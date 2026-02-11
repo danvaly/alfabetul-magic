@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-orange" alt="License"/>
 </p>
 
-<h1 align="center">Alfabetul Magic</h1>
+<h1 align="center">Alfabetul Magic Ad Free</h1>
 
 <p align="center">
   <strong>A fun, Duolingo-inspired Android app that teaches kids the Romanian alphabet through interactive games, handwriting practice, and animated stories.</strong>
