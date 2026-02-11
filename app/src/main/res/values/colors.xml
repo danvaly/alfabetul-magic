@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FF6B9E</color>
+    <color name="primary_variant">#FF4081</color>
+    <color name="secondary">#7C4DFF</color>
+    <color name="background">#FFF8E1</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="on_background">#37474F</color>
+
+    <!-- Game colors -->
+    <color name="correct_green">#66BB6A</color>
+    <color name="wrong_red">#EF5350</color>
+    <color name="star_gold">#FFD54F</color>
+
+    <!-- Pastel palette for letter cards -->
+    <color name="pastel_pink">#FFB3BA</color>
+    <color name="pastel_peach">#FFDFBA</color>
+    <color name="pastel_yellow">#FFFFBA</color>
+    <color name="pastel_green">#BAFFC9</color>
+    <color name="pastel_blue">#BAE1FF</color>
+    <color name="pastel_lavender">#D4BAFF</color>
+    <color name="pastel_mint">#B2F5EA</color>
+    <color name="pastel_coral">#FFB4A2</color>
+</resources>
