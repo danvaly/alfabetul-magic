@@ -13,6 +13,7 @@ class ProgressRepository(private val dao: ProgressDao) {
     val learnedCount: Flow<Int> = dao.getLearnedCount()
     val totalStars: Flow<Int?> = dao.getTotalStars()
     val appStats: Flow<AppStats?> = dao.getAppStats()
+    val allStarsTotal: Flow<Int?> = dao.getAllStarsTotal()
 
     fun getLetterProgress(letter: String): Flow<LetterProgress?> =
         dao.getLetterProgress(letter)
@@ -37,6 +38,28 @@ class ProgressRepository(private val dao: ProgressDao) {
         )
     }
 
+    suspend fun updateWordMatchStars(letter: String, stars: Int) {
+        dao.upsertProgress(
+            LetterProgress(
+                letter = letter,
+                learnCompleted = true,
+                wordMatchStars = stars,
+                lastPlayedTimestamp = System.currentTimeMillis()
+            )
+        )
+    }
+
+    suspend fun updateDiacriticStars(letter: String, stars: Int) {
+        dao.upsertProgress(
+            LetterProgress(
+                letter = letter,
+                learnCompleted = true,
+                diacriticStars = stars,
+                lastPlayedTimestamp = System.currentTimeMillis()
+            )
+        )
+    }
+
     suspend fun incrementQuizCorrect(letter: String, currentCorrect: Int) {
         dao.upsertProgress(
             LetterProgress(
@@ -54,6 +77,26 @@ class ProgressRepository(private val dao: ProgressDao) {
         if (starsEarned > 0) {
             dao.addStars(starsEarned)
         }
+    }
+
+    suspend fun setDifficulty(difficulty: Int) {
+        ensureStatsExist()
+        dao.setDifficulty(difficulty)
+    }
+
+    suspend fun completeDailyChallenge() {
+        ensureStatsExist()
+        dao.updateDailyChallenge(LocalDate.now().toString(), true)
+    }
+
+    suspend fun isDailyChallengeCompleted(): Boolean {
+        val stats = dao.getAppStats().firstOrNull() ?: return false
+        return stats.dailyChallengeDate == LocalDate.now().toString() && stats.dailyChallengeCompleted
+    }
+
+    suspend fun addPlayTime(minutes: Int) {
+        ensureStatsExist()
+        dao.addPlayTime(minutes)
     }
 
     private suspend fun ensureStatsExist() {

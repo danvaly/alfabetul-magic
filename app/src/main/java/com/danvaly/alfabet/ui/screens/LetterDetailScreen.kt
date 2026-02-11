@@ -2,8 +2,14 @@ package com.danvaly.alfabet.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
@@ -16,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -70,6 +77,26 @@ fun LetterDetailScreen(
     val scope = rememberCoroutineScope()
     var isVisible by remember { mutableStateOf(false) }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "detail_anim")
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = -5f,
+        targetValue = 5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float"
+    )
+    val floatOffset2 by infiniteTransition.animateFloat(
+        initialValue = 4f,
+        targetValue = -4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float2"
+    )
+
     LaunchedEffect(letterChar) {
         isVisible = true
         soundManager.speakLetterIntro(letterChar, letter?.phoneticSound ?: "")
@@ -91,10 +118,39 @@ fun LetterDetailScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(BackgroundCream, BackgroundLight)
+                    colors = listOf(Color(0xFFE8F5E9), BackgroundCream, BackgroundLight)
                 )
             )
     ) {
+        // Floating nature decorations
+        Text(
+            text = "\uD83E\uDD8B",
+            fontSize = 28.sp,
+            modifier = Modifier
+                .offset(x = 20.dp, y = (30 + floatOffset).dp)
+        )
+        Text(
+            text = "\uD83C\uDF3A",
+            fontSize = 24.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-15).dp, y = (25 + floatOffset2).dp)
+        )
+        Text(
+            text = "\uD83D\uDC1E",
+            fontSize = 22.sp,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = 20.dp, y = (-15 + floatOffset).dp)
+        )
+        Text(
+            text = "\uD83C\uDF37",
+            fontSize = 22.sp,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset(x = (-20).dp, y = (-10 + floatOffset2).dp)
+        )
+
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -109,20 +165,26 @@ fun LetterDetailScreen(
                     onClick = onBack,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(PrimaryPink.copy(alpha = 0.1f))
+                        .background(DuoGreen.copy(alpha = 0.15f))
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Inapoi",
-                        tint = PrimaryPink
+                        tint = DuoGreen
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "\uD83D\uDC3B",
+                    fontSize = 28.sp,
+                    modifier = Modifier.offset(y = floatOffset.dp)
+                )
                 Text(
                     text = "Litera ${letter.uppercase}",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = PrimaryPink,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 12.dp)
+                    color = DuoGreen,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
 
@@ -150,33 +212,39 @@ fun LetterDetailScreen(
                             }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "${letter.uppercase} face \"${letter.phoneticSound}\"",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = OnBackgroundLight,
-                            textAlign = TextAlign.Center
-                        )
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = letterColor.copy(alpha = 0.15f))
+                        ) {
+                            Text(
+                                text = "${letter.uppercase} face \"${letter.phoneticSound}\"",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = OnBackground,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            // Hear button
+                            // Hear button - Duolingo 3D style
                             Button(
                                 onClick = { soundManager.speakPhonetic(letter.phoneticSound) },
-                                colors = ButtonDefaults.buttonColors(containerColor = letterColor),
-                                shape = RoundedCornerShape(16.dp)
+                                colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
+                                shape = RoundedCornerShape(20.dp)
                             ) {
                                 Icon(Icons.Filled.VolumeUp, contentDescription = "Asculta")
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Asculta")
+                                Text("Asculta", fontWeight = FontWeight.Bold)
                             }
                             // Trace button
                             Button(
                                 onClick = onTrace,
-                                colors = ButtonDefaults.buttonColors(containerColor = SecondaryPurple),
-                                shape = RoundedCornerShape(16.dp)
+                                colors = ButtonDefaults.buttonColors(containerColor = DuoBlue),
+                                shape = RoundedCornerShape(20.dp)
                             ) {
                                 Icon(Icons.Filled.Draw, contentDescription = "Scrie")
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Scrie")
+                                Text("Scrie", fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -187,12 +255,20 @@ fun LetterDetailScreen(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Cuvinte cu litera ${letter.uppercase}:",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = OnBackground,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Cuvinte cu litera ${letter.uppercase}:",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = OnBackground,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "\uD83D\uDC1D",
+                            fontSize = 20.sp,
+                            modifier = Modifier.offset(y = floatOffset2.dp)
+                        )
+                    }
                     letter.words.forEach { word ->
                         WordCard(
                             emoji = word.emoji,
@@ -214,6 +290,16 @@ private fun BouncingLetter(
     onClick: () -> Unit
 ) {
     val scale = remember { Animatable(0.5f) }
+    val infiniteTransition = rememberInfiniteTransition(label = "bounce_letter")
+    val pulse by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.03f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
 
     LaunchedEffect(letter) {
         scale.animateTo(
@@ -222,34 +308,48 @@ private fun BouncingLetter(
         )
     }
 
-    Card(
-        modifier = Modifier
-            .size(200.dp)
-            .scale(scale.value)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = letterColor),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+    // Duolingo-style 3D card
+    Box {
+        // Shadow
+        Card(
+            modifier = Modifier
+                .size(200.dp)
+                .scale(scale.value * pulse)
+                .offset(y = 6.dp),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = letterColor.copy(alpha = 0.6f)),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {}
+
+        Card(
+            modifier = Modifier
+                .size(200.dp)
+                .scale(scale.value * pulse)
+                .clickable(onClick = onClick),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = letterColor),
+            elevation = CardDefaults.cardElevation(0.dp)
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = letter.uppercase,
-                    fontSize = 96.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    color = Color.White
-                )
-                Text(
-                    text = letter.lowercase,
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = FontFamily.Serif,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = letter.uppercase,
+                        fontSize = 96.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.SansSerif,
+                        color = Color.White
+                    )
+                    Text(
+                        text = letter.lowercase,
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
             }
         }
     }
@@ -266,7 +366,7 @@ private fun WordCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
@@ -281,16 +381,23 @@ private fun WordCard(
             Text(
                 text = word,
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = OnBackground
             )
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                Icons.Filled.VolumeUp,
-                contentDescription = "Asculta $word",
-                tint = PrimaryPink,
-                modifier = Modifier.size(28.dp)
-            )
+            Card(
+                shape = CircleShape,
+                colors = CardDefaults.cardColors(containerColor = DuoGreen.copy(alpha = 0.15f))
+            ) {
+                Icon(
+                    Icons.Filled.VolumeUp,
+                    contentDescription = "Asculta $word",
+                    tint = DuoGreen,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .padding(6.dp)
+                )
+            }
         }
     }
 }

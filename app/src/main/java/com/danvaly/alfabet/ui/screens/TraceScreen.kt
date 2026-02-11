@@ -1,19 +1,26 @@
 package com.danvaly.alfabet.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,22 +48,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.DrawingPath
+import com.danvaly.alfabet.ui.components.LetterCard
 import com.danvaly.alfabet.ui.components.StarRating
 import com.danvaly.alfabet.ui.components.TracingCanvas
 import com.danvaly.alfabet.ui.components.calculateTraceScore
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import com.danvaly.alfabet.ui.components.LetterCard
 import com.danvaly.alfabet.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -77,6 +82,17 @@ fun TraceScreen(
 
     val displayLetter = if (isUppercase) letterChar else (letter?.lowercase ?: letterChar.lowercase())
 
+    val infiniteTransition = rememberInfiniteTransition(label = "trace_anim")
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = -4f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float"
+    )
+
     LaunchedEffect(letterChar) {
         soundManager.speakSentence("Scrie litera $letterChar cu degetul")
     }
@@ -86,13 +102,26 @@ fun TraceScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(BackgroundCream, BackgroundLight)
+                    colors = listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB), BackgroundCream)
                 )
             )
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        // Decorations
+        Text(
+            text = "\uD83D\uDC1D",
+            fontSize = 26.sp,
+            modifier = Modifier
+                .offset(x = 10.dp, y = (20 + floatOffset).dp)
+        )
+        Text(
+            text = "\uD83C\uDF3A",
+            fontSize = 22.sp,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = 10.dp, y = (-10 + floatOffset).dp)
+        )
+
+        Row(modifier = Modifier.fillMaxSize()) {
             // Left panel: controls
             Column(
                 modifier = Modifier
@@ -106,21 +135,29 @@ fun TraceScreen(
                         onClick = onBack,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(PrimaryPink.copy(alpha = 0.1f))
+                            .background(DuoBlue.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Inapoi",
-                            tint = PrimaryPink
+                            tint = DuoBlue
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Scrie litera",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = PrimaryPink,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "\u270D\uFE0F",
+                            fontSize = 22.sp,
+                            modifier = Modifier.offset(y = floatOffset.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Scrie litera",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = DuoBlue,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
                     Text(
                         text = "Urmareste forma literei cu degetul",
                         style = MaterialTheme.typography.bodyMedium,
@@ -129,7 +166,6 @@ fun TraceScreen(
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Toggle uppercase/lowercase
                     Button(
                         onClick = {
                             isUppercase = !isUppercase
@@ -137,30 +173,31 @@ fun TraceScreen(
                             currentPath = null
                             showResult = false
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = SecondaryPurple),
+                        colors = ButtonDefaults.buttonColors(containerColor = DuoPurple),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (isUppercase) "minuscula" else "MAJUSCULA")
+                        Text(
+                            if (isUppercase) "minuscula" else "MAJUSCULA",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
-                    // Clear button
                     Button(
                         onClick = {
                             paths.clear()
                             currentPath = null
                             showResult = false
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = WrongRed),
+                        colors = ButtonDefaults.buttonColors(containerColor = DuoRed),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Filled.Delete, contentDescription = "Sterge")
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Sterge")
+                        Text("Sterge", fontWeight = FontWeight.Bold)
                     }
 
-                    // Done button
                     Button(
                         onClick = {
                             stars = calculateTraceScore(paths)
@@ -171,16 +208,15 @@ fun TraceScreen(
                                 repository.onGamePlayed(stars)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = CorrectGreen),
+                        colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Filled.Done, contentDescription = "Gata")
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Gata!")
+                        Text("Gata!", fontWeight = FontWeight.Bold)
                     }
 
-                    // Next letter
                     Button(
                         onClick = {
                             val letters = RomanianAlphabet.letters
@@ -191,11 +227,11 @@ fun TraceScreen(
                             showResult = false
                             soundManager.speakLetter(letters[nextIndex].uppercase)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryPink),
+                        colors = ButtonDefaults.buttonColors(containerColor = DuoOrange),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Urmatoarea")
+                        Text("Urmatoarea", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Urmatoarea")
                     }
@@ -203,7 +239,12 @@ fun TraceScreen(
             }
 
             // Right panel: drawing canvas
-            Box(modifier = Modifier.weight(1f).fillMaxSize().padding(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
                 Card(
                     modifier = Modifier.fillMaxSize(),
                     shape = RoundedCornerShape(24.dp),
@@ -217,7 +258,7 @@ fun TraceScreen(
                         onDragStart = { offset ->
                             val newPath = DrawingPath(
                                 path = Path().apply { moveTo(offset.x, offset.y) },
-                                color = PrimaryPink,
+                                color = DuoBlue,
                                 strokeWidth = 14f
                             )
                             currentPath = newPath
@@ -242,12 +283,14 @@ fun TraceScreen(
                 // Result overlay
                 if (showResult) {
                     Card(
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(24.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (stars >= 2) CorrectGreenLight else PastelColors[1]
+                            containerColor = if (stars >= 2) DuoGreen else DuoOrange
                         ),
                         elevation = CardDefaults.cardElevation(8.dp),
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(24.dp),
@@ -255,14 +298,14 @@ fun TraceScreen(
                         ) {
                             Text(
                                 text = when (stars) {
-                                    3 -> "Excelent!"
-                                    2 -> "Foarte bine!"
-                                    1 -> "Bun inceput!"
-                                    else -> "Mai incearca!"
+                                    3 -> "\uD83C\uDF89 Excelent!"
+                                    2 -> "\u2B50 Foarte bine!"
+                                    1 -> "\uD83D\uDC4D Bun inceput!"
+                                    else -> "\uD83D\uDCAA Mai incearca!"
                                 },
                                 style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = OnBackground
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             StarRating(stars = stars)
@@ -280,16 +323,34 @@ fun TraceSelectorScreen(
     onBack: () -> Unit,
     soundManager: SoundManager? = null
 ) {
-    // Reuse the Learn screen grid for letter selection
+    val infiniteTransition = rememberInfiniteTransition(label = "trace_sel_anim")
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = -4f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(BackgroundCream, BackgroundLight)
+                    colors = listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB), BackgroundCream)
                 )
             )
     ) {
+        Text(
+            text = "\uD83D\uDC1D",
+            fontSize = 26.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-25).dp, y = (40 + floatOffset).dp)
+        )
+
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -301,20 +362,26 @@ fun TraceSelectorScreen(
                     onClick = onBack,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(PrimaryPink.copy(alpha = 0.1f))
+                        .background(DuoBlue.copy(alpha = 0.15f))
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Inapoi",
-                        tint = PrimaryPink
+                        tint = DuoBlue
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "\u270D\uFE0F",
+                    fontSize = 24.sp,
+                    modifier = Modifier.offset(y = floatOffset.dp)
+                )
                 Text(
                     text = "Alege o litera pentru a scrie",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = PrimaryPink,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 12.dp)
+                    color = DuoBlue,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
 

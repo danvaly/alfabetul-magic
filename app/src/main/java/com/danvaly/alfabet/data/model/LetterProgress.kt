@@ -11,7 +11,9 @@ data class LetterProgress(
     val quizCorrect: Int = 0,
     val syllableCompleted: Boolean = false,
     val miniGamePlayed: Boolean = false,
-    val lastPlayedTimestamp: Long = 0L
+    val lastPlayedTimestamp: Long = 0L,
+    val wordMatchStars: Int = 0,
+    val diacriticStars: Int = 0
 )
 
 @Entity(tableName = "app_stats")
@@ -22,5 +24,9 @@ data class AppStats(
     val currentStreak: Int = 0,
     val lastPlayDate: String = "",
     val balloonsPopped: Int = 0,
-    val matchesCompleted: Int = 0
+    val matchesCompleted: Int = 0,
+    val dailyChallengeDate: String = "",
+    val dailyChallengeCompleted: Boolean = false,
+    val difficulty: Int = 1,
+    val totalPlayTimeMinutes: Int = 0
 )
