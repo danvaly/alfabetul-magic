@@ -58,7 +58,7 @@ jobs:
             ### Ce este nou
             - Consultă commit-urile pentru detalii
           files: |
-            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/outputs/apk/release/app-release.apk
           draft: false
           prerelease: false
 
@@ -66,5 +66,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-${{ steps.version.outputs.VERSION }}
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 90
