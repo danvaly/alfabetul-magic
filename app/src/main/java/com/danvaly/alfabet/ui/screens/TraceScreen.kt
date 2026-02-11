@@ -240,17 +240,14 @@ fun TraceScreen(
                 }
 
                 // Result overlay
-                AnimatedVisibility(
-                    visible = showResult,
-                    enter = scaleIn() + fadeIn(),
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
-                ) {
+                if (showResult) {
                     Card(
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = if (stars >= 2) CorrectGreenLight else PastelColors[1]
                         ),
-                        elevation = CardDefaults.cardElevation(8.dp)
+                        elevation = CardDefaults.cardElevation(8.dp),
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(24.dp),
