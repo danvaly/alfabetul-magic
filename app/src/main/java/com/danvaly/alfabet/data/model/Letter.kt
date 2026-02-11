@@ -7,7 +7,8 @@ data class Letter(
     val words: List<ExampleWord>,
     val isVowel: Boolean,
     val isDiacritic: Boolean = false,
-    val colorIndex: Int = 0
+    val colorIndex: Int = 0,
+    val story: String = ""
 )
 
 data class ExampleWord(

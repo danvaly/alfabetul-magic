@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -25,7 +26,8 @@ import com.danvaly.alfabet.ui.theme.PrimaryPink
 data class DrawingPath(
     val path: Path = Path(),
     val color: Color = PrimaryPink,
-    val strokeWidth: Float = 16f
+    val strokeWidth: Float = 16f,
+    val points: List<Offset> = emptyList()
 )
 
 @Composable
@@ -130,18 +132,72 @@ fun TracingCanvas(
     }
 }
 
-fun calculateTraceScore(paths: List<DrawingPath>): Int {
+fun calculateTraceScore(paths: List<DrawingPath>, canvasWidth: Float = 0f, canvasHeight: Float = 0f): Int {
     if (paths.isEmpty()) return 0
-    val totalPathLength = paths.sumOf { estimatePathLength(it.path).toInt() }
-    return when {
+
+    val totalPathLength = paths.sumOf { estimatePathLength(it).toInt() }
+    val totalPoints = paths.sumOf { it.points.size }
+    val allPoints = paths.flatMap { it.points }
+
+    // Coverage score: how much of the canvas center area is covered
+    val coverageScore = if (allPoints.size > 5 && canvasWidth > 0 && canvasHeight > 0) {
+        val centerX = canvasWidth / 2f
+        val centerY = canvasHeight / 2f
+        val letterZoneRadius = minOf(canvasWidth, canvasHeight) * 0.35f
+
+        val zonesHit = mutableSetOf<Int>()
+        val zoneSize = letterZoneRadius / 4f
+        allPoints.forEach { point ->
+            val dx = point.x - centerX
+            val dy = point.y - centerY
+            if (dx * dx + dy * dy <= letterZoneRadius * letterZoneRadius) {
+                val zoneX = ((point.x - centerX + letterZoneRadius) / zoneSize).toInt()
+                val zoneY = ((point.y - centerY + letterZoneRadius) / zoneSize).toInt()
+                zonesHit.add(zoneX * 10 + zoneY)
+            }
+        }
+        zonesHit.size
+    } else {
+        0
+    }
+
+    // Combined scoring: path length + point count + zone coverage
+    val lengthScore = when {
         totalPathLength > 800 -> 3
         totalPathLength > 400 -> 2
         totalPathLength > 100 -> 1
         else -> 0
     }
+
+    val pointScore = when {
+        totalPoints > 200 -> 3
+        totalPoints > 80 -> 2
+        totalPoints > 20 -> 1
+        else -> 0
+    }
+
+    val zoneScore = when {
+        coverageScore > 20 -> 3
+        coverageScore > 10 -> 2
+        coverageScore > 4 -> 1
+        else -> 0
+    }
+
+    // Average the three scores, minimum 0, maximum 3
+    val avgScore = (lengthScore + pointScore + zoneScore + 1) / 3
+    return avgScore.coerceIn(0, 3)
 }
 
-private fun estimatePathLength(path: Path): Float {
-    val bounds = path.getBounds()
-    return bounds.width + bounds.height
+private fun estimatePathLength(drawingPath: DrawingPath): Float {
+    if (drawingPath.points.size < 2) {
+        val bounds = drawingPath.path.getBounds()
+        return bounds.width + bounds.height
+    }
+    var length = 0f
+    for (i in 1 until drawingPath.points.size) {
+        val dx = drawingPath.points[i].x - drawingPath.points[i - 1].x
+        val dy = drawingPath.points[i].y - drawingPath.points[i - 1].y
+        length += kotlin.math.sqrt(dx * dx + dy * dy)
+    }
+    return length
 }

@@ -36,4 +36,16 @@ interface ProgressDao {
 
     @Query("UPDATE app_stats SET totalStars = totalStars + :stars WHERE id = 1")
     suspend fun addStars(stars: Int)
+
+    @Query("UPDATE app_stats SET difficulty = :difficulty WHERE id = 1")
+    suspend fun setDifficulty(difficulty: Int)
+
+    @Query("UPDATE app_stats SET dailyChallengeDate = :date, dailyChallengeCompleted = :completed WHERE id = 1")
+    suspend fun updateDailyChallenge(date: String, completed: Boolean)
+
+    @Query("UPDATE app_stats SET totalPlayTimeMinutes = totalPlayTimeMinutes + :minutes WHERE id = 1")
+    suspend fun addPlayTime(minutes: Int)
+
+    @Query("SELECT SUM(traceStars) + SUM(wordMatchStars) + SUM(diacriticStars) FROM letter_progress")
+    fun getAllStarsTotal(): Flow<Int?>
 }

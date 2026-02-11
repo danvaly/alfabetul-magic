@@ -31,7 +31,9 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -61,6 +63,8 @@ fun HomeScreen(
     onNavigateToSyllable: () -> Unit,
     onNavigateToGames: () -> Unit,
     onNavigateToProgress: () -> Unit,
+    onNavigateToDailyChallenge: () -> Unit,
+    onNavigateToParentDashboard: () -> Unit,
     soundManager: SoundManager
 ) {
     val titleScale = remember { Animatable(0.3f) }
@@ -76,7 +80,6 @@ fun HomeScreen(
         )
     }
 
-    // Floating animation for decorative elements
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = -8f,
         targetValue = 8f,
@@ -120,12 +123,11 @@ fun HomeScreen(
                 )
             )
     ) {
-        // Floating animals and flowers scattered around the background
+        // Floating animals and flowers
         Text(
             text = "\uD83E\uDD8B",
             fontSize = 36.sp,
-            modifier = Modifier
-                .offset(x = 30.dp, y = (20 + floatOffset).dp)
+            modifier = Modifier.offset(x = 30.dp, y = (20 + floatOffset).dp)
         )
         Text(
             text = "\uD83C\uDF3B",
@@ -137,8 +139,7 @@ fun HomeScreen(
         Text(
             text = "\uD83D\uDC30",
             fontSize = 34.sp,
-            modifier = Modifier
-                .offset(x = 15.dp, y = (140 + floatOffset3).dp)
+            modifier = Modifier.offset(x = 15.dp, y = (140 + floatOffset3).dp)
         )
         Text(
             text = "\uD83C\uDF3A",
@@ -164,8 +165,7 @@ fun HomeScreen(
         Text(
             text = "\uD83C\uDF37",
             fontSize = 26.sp,
-            modifier = Modifier
-                .offset(x = 50.dp, y = (260 + floatOffset).dp)
+            modifier = Modifier.offset(x = 50.dp, y = (260 + floatOffset).dp)
         )
         Text(
             text = "\uD83D\uDC26",
@@ -215,9 +215,9 @@ fun HomeScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Game mode cards - Duolingo-style big colorful 3D buttons
+            // Main game mode cards - top row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
@@ -269,7 +269,36 @@ fun HomeScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Bottom row: Daily Challenge + Parent Dashboard
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
+            ) {
+                GameModeCard(
+                    title = "Provocarea\nZilei",
+                    emoji = "\uD83C\uDF1F",
+                    icon = Icons.Filled.Star,
+                    backgroundColor = Color(0xFFFF6B6B),
+                    shadowColor = Color(0xFFCC4444),
+                    onClick = onNavigateToDailyChallenge,
+                    modifier = Modifier.weight(1f),
+                    cardHeight = 140
+                )
+                GameModeCard(
+                    title = "Panou\nParinti",
+                    emoji = "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67",
+                    icon = Icons.Filled.Settings,
+                    backgroundColor = Color(0xFF78909C),
+                    shadowColor = Color(0xFF546E7A),
+                    onClick = onNavigateToParentDashboard,
+                    modifier = Modifier.weight(1f),
+                    cardHeight = 140
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Bottom row of decorative flowers
             Row(
@@ -298,7 +327,8 @@ private fun GameModeCard(
     backgroundColor: Color,
     shadowColor: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cardHeight: Int = 190
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -323,13 +353,11 @@ private fun GameModeCard(
         }
     }
 
-    // Duolingo-style 3D button with bottom shadow
     Box(
         modifier = modifier
-            .height(210.dp)
+            .height(cardHeight.dp)
             .scale(scale.value)
     ) {
-        // Shadow/bottom card
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -339,7 +367,6 @@ private fun GameModeCard(
             elevation = CardDefaults.cardElevation(0.dp)
         ) {}
 
-        // Main card
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -362,23 +389,23 @@ private fun GameModeCard(
             ) {
                 Text(
                     text = emoji,
-                    fontSize = 44.sp,
+                    fontSize = if (cardHeight > 150) 44.sp else 32.sp,
                     modifier = Modifier.offset(y = wobble.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
                     tint = Color.White,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White,
                     textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
+                    lineHeight = 18.sp
                 )
             }
         }

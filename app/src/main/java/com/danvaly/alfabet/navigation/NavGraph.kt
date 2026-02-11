@@ -27,6 +27,8 @@ fun AlfabetNavGraph(
                 onNavigateToSyllable = { navController.navigate(Screen.Syllable.route) },
                 onNavigateToGames = { navController.navigate(Screen.Games.route) },
                 onNavigateToProgress = { navController.navigate(Screen.Progress.route) },
+                onNavigateToDailyChallenge = { navController.navigate(Screen.DailyChallenge.route) },
+                onNavigateToParentDashboard = { navController.navigate(Screen.ParentDashboard.route) },
                 soundManager = soundManager
             )
         }
@@ -93,6 +95,11 @@ fun AlfabetNavGraph(
                 },
                 onMatchGame = { navController.navigate(Screen.MatchGame.route) },
                 onQuizGame = { navController.navigate(Screen.QuizGame.route) },
+                onWordMatch = { navController.navigate(Screen.WordMatch.route) },
+                onDiacritics = { navController.navigate(Screen.Diacritics.route) },
+                onSentenceBuild = { navController.navigate(Screen.SentenceBuild.route) },
+                onRhymingGame = { navController.navigate(Screen.RhymingGame.route) },
+                onAlphabetOrder = { navController.navigate(Screen.AlphabetOrder.route) },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -128,6 +135,73 @@ fun AlfabetNavGraph(
 
         composable(Screen.Progress.route) {
             ProgressScreen(
+                onBack = { navController.popBackStack() },
+                repository = repository
+            )
+        }
+
+        composable(Screen.WordMatch.route) {
+            WordMatchScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(
+            route = Screen.LetterStory.route,
+            arguments = listOf(navArgument("letter") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val letter = backStackEntry.arguments?.getString("letter") ?: "A"
+            LetterStoryScreen(
+                letterChar = letter,
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager
+            )
+        }
+
+        composable(Screen.Diacritics.route) {
+            DiacriticsScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.DailyChallenge.route) {
+            DailyChallengeScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.SentenceBuild.route) {
+            SentenceBuildScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.RhymingGame.route) {
+            RhymingGameScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.AlphabetOrder.route) {
+            AlphabetOrderScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.ParentDashboard.route) {
+            ParentDashboardScreen(
                 onBack = { navController.popBackStack() },
                 repository = repository
             )

@@ -24,8 +24,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -56,6 +58,11 @@ fun GamesMenuScreen(
     onBalloonPop: (String) -> Unit,
     onMatchGame: () -> Unit,
     onQuizGame: () -> Unit,
+    onWordMatch: () -> Unit,
+    onDiacritics: () -> Unit,
+    onSentenceBuild: () -> Unit,
+    onRhymingGame: () -> Unit,
+    onAlphabetOrder: () -> Unit,
     onBack: () -> Unit
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "games_anim")
@@ -91,8 +98,7 @@ fun GamesMenuScreen(
         Text(
             text = "\uD83D\uDC3E",
             fontSize = 30.sp,
-            modifier = Modifier
-                .offset(x = 20.dp, y = (30 + floatOffset).dp)
+            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
         )
         Text(
             text = "\uD83C\uDF3A",
@@ -150,13 +156,13 @@ fun GamesMenuScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // First row - 4 games
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
             ) {
-                // Balloon Pop
                 GameCard3D(
                     emoji = "\uD83C\uDF88",
                     animal = "\uD83D\uDC3B",
@@ -170,8 +176,6 @@ fun GamesMenuScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-
-                // Match Game
                 GameCard3D(
                     emoji = "\uD83C\uDCCF",
                     animal = "\uD83D\uDC30",
@@ -182,8 +186,6 @@ fun GamesMenuScreen(
                     onClick = onMatchGame,
                     modifier = Modifier.weight(1f)
                 )
-
-                // Quiz
                 GameCard3D(
                     emoji = "\uD83C\uDFB5",
                     animal = "\uD83E\uDD89",
@@ -192,6 +194,65 @@ fun GamesMenuScreen(
                     backgroundColor = DuoGreen,
                     shadowColor = DuoGreenDark,
                     onClick = onQuizGame,
+                    modifier = Modifier.weight(1f)
+                )
+                GameCard3D(
+                    emoji = "\uD83D\uDDBC\uFE0F",
+                    animal = "\uD83D\uDC1D",
+                    title = "Cuvant si\nImagine",
+                    description = "Potriveste cuvantul cu imaginea",
+                    backgroundColor = DuoBlue,
+                    shadowColor = DuoBlueDark,
+                    onClick = onWordMatch,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Second row - 4 games
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
+            ) {
+                GameCard3D(
+                    emoji = "\u270D\uFE0F",
+                    animal = "\uD83E\uDD8B",
+                    title = "Diacritice",
+                    description = "Invata literele speciale romanesti",
+                    backgroundColor = Color(0xFF9C27B0),
+                    shadowColor = Color(0xFF7B1FA2),
+                    onClick = onDiacritics,
+                    modifier = Modifier.weight(1f)
+                )
+                GameCard3D(
+                    emoji = "\uD83D\uDCDD",
+                    animal = "\uD83D\uDC26",
+                    title = "Construieste\nPropozitia",
+                    description = "Pune cuvintele in ordine",
+                    backgroundColor = Color(0xFF00897B),
+                    shadowColor = Color(0xFF00695C),
+                    onClick = onSentenceBuild,
+                    modifier = Modifier.weight(1f)
+                )
+                GameCard3D(
+                    emoji = "\uD83C\uDFB5",
+                    animal = "\uD83D\uDC25",
+                    title = "Jocul\nRimelor",
+                    description = "Gaseste cuvinte care rimeaza",
+                    backgroundColor = DuoPink,
+                    shadowColor = Color(0xFFE060A0),
+                    onClick = onRhymingGame,
+                    modifier = Modifier.weight(1f)
+                )
+                GameCard3D(
+                    emoji = "\uD83D\uDD24",
+                    animal = "\uD83D\uDC22",
+                    title = "Ordoneaza\nAlfabetul",
+                    description = "Pune literele in ordine alfabetica",
+                    backgroundColor = Color(0xFF0288D1),
+                    shadowColor = Color(0xFF01579B),
+                    onClick = onAlphabetOrder,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -234,10 +295,9 @@ private fun GameCard3D(
 
     Box(
         modifier = modifier
-            .height(280.dp)
+            .height(220.dp)
             .scale(scale.value)
     ) {
-        // 3D shadow
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -247,7 +307,6 @@ private fun GameCard3D(
             elevation = CardDefaults.cardElevation(0.dp)
         ) {}
 
-        // Main card
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -264,33 +323,33 @@ private fun GameCard3D(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = emoji,
-                    fontSize = 56.sp,
+                    fontSize = 40.sp,
                     modifier = Modifier.offset(y = bounce.dp)
                 )
                 Text(
                     text = animal,
-                    fontSize = 24.sp,
-                    modifier = Modifier.offset(x = 30.dp, y = (-10).dp)
+                    fontSize = 20.sp,
+                    modifier = Modifier.offset(x = 24.dp, y = (-8).dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
                     textAlign = TextAlign.Center,
-                    lineHeight = 28.sp
+                    lineHeight = 22.sp
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center
                 )

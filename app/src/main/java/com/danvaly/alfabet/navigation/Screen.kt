@@ -18,4 +18,14 @@ sealed class Screen(val route: String) {
     data object MatchGame : Screen("match_game")
     data object QuizGame : Screen("quiz_game")
     data object Progress : Screen("progress")
+    data object WordMatch : Screen("word_match")
+    data object LetterStory : Screen("letter_story/{letter}") {
+        fun createRoute(letter: String) = "letter_story/$letter"
+    }
+    data object Diacritics : Screen("diacritics")
+    data object DailyChallenge : Screen("daily_challenge")
+    data object SentenceBuild : Screen("sentence_build")
+    data object RhymingGame : Screen("rhyming_game")
+    data object AlphabetOrder : Screen("alphabet_order")
+    data object ParentDashboard : Screen("parent_dashboard")
 }
