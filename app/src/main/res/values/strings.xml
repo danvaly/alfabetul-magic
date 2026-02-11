@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Alfabetul Magic</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Alfabetul Magic</string>
+    <string name="home_subtitle">Învață alfabetul românesc prin joacă!</string>
+    <string name="mode_learn">Învață Literele</string>
+    <string name="mode_learn_desc">Descoperă fiecare literă</string>
+    <string name="mode_trace">Scrie Literele</string>
+    <string name="mode_trace_desc">Exersează scrierea</string>
+    <string name="mode_syllable">Formează Silabe</string>
+    <string name="mode_syllable_desc">Combină literele în silabe</string>
+    <string name="mode_games">Jocuri</string>
+    <string name="mode_games_desc">Învață prin joacă</string>
+    <string name="mode_progress">Progresul Meu</string>
+    <string name="mode_progress_desc">Vezi realizările tale</string>
+
+    <!-- Learn Screen -->
+    <string name="learn_title">Alfabetul Românesc</string>
+    <string name="letter_intro">Aceasta este litera</string>
+    <string name="letter_sound">face sunetul</string>
+    <string name="example_words">Cuvinte cu litera</string>
+    <string name="tap_to_hear">Atinge pentru a auzi</string>
+    <string name="back">Înapoi</string>
+
+    <!-- Trace Screen -->
+    <string name="trace_title">Scrie Litera</string>
+    <string name="trace_instruction">Urmărește litera cu degetul</string>
+    <string name="trace_clear">Șterge</string>
+    <string name="trace_next">Următoarea</string>
+    <string name="trace_perfect">Excelent! ⭐⭐⭐</string>
+    <string name="trace_good">Foarte bine! ⭐⭐</string>
+    <string name="trace_try_again">Mai încearcă! ⭐</string>
+
+    <!-- Syllable Screen -->
+    <string name="syllable_title">Formează Silabe</string>
+    <string name="syllable_instruction">Alege o consoană și o vocală</string>
+    <string name="syllable_consonant">Consoană</string>
+    <string name="syllable_vowel">Vocală</string>
+    <string name="syllable_result">Silaba:</string>
+    <string name="syllable_word_challenge">Formează cuvântul:</string>
+
+    <!-- Games -->
+    <string name="game_balloon_title">Sparge Baloanele</string>
+    <string name="game_balloon_instruction">Atinge baloanele cu litera</string>
+    <string name="game_match_title">Potrivește Literele</string>
+    <string name="game_match_instruction">Găsește perechile de litere</string>
+    <string name="game_quiz_title">Ce Literă Auzi?</string>
+    <string name="game_quiz_instruction">Ascultă și alege litera corectă</string>
+    <string name="game_score">Scor: %d</string>
+    <string name="game_time">Timp: %d</string>
+    <string name="game_correct">Corect!</string>
+    <string name="game_try_again">Mai încearcă!</string>
+    <string name="game_finished">Bravo! Ai terminat!</string>
+    <string name="game_play_again">Joacă din nou</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Progresul Meu</string>
+    <string name="progress_letters_learned">Litere învățate</string>
+    <string name="progress_stars_earned">Stele câștigate</string>
+    <string name="progress_games_played">Jocuri jucate</string>
+    <string name="progress_streak">Zile consecutive</string>
+    <string name="achievement_explorer">Explorator de Litere</string>
+    <string name="achievement_writer">Scriitor Începător</string>
+    <string name="achievement_master">Maestru al Alfabetului</string>
+    <string name="sticker_album">Albumul de Abțibilduri</string>
+
+    <!-- General -->
+    <string name="congratulations">Felicitări!</string>
+    <string name="continue_btn">Continuă</string>
+    <string name="close">Închide</string>
+</resources>
