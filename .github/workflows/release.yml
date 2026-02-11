@@ -71,13 +71,14 @@ jobs:
             --title "Alfabetul Magic v${{ steps.version.outputs.VERSION }}" \
             --notes "## Alfabetul Magic v${{ steps.version.outputs.VERSION }}
 
-          Aplicatie educationala pentru invatarea alfabetului romanesc.
+            Aplicație educațională pentru învățarea alfabetului românesc.
 
-          ### Descarca
-          Descarca fisierul APK de mai jos si instaleaza-l pe tableta ta Android.
+            ### Descarcă
+            Descarcă fișierul APK de mai jos și instalează-l pe tableta ta Android.
 
-          ### Ce este nou
-          - Consulta commit-urile pentru detalii"
+            ### Ce este nou
+            - Consultă commit-urile pentru detalii" \
+              app/build/outputs/apk/release/alfabetul-magic-v${{ steps.version.outputs.VERSION }}.apk
 
       - name: Upload release APK as artifact
         uses: actions/upload-artifact@v4
