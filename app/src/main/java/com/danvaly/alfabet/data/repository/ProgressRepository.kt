@@ -4,6 +4,7 @@ import com.danvaly.alfabet.data.local.ProgressDao
 import com.danvaly.alfabet.data.model.AppStats
 import com.danvaly.alfabet.data.model.LetterProgress
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import java.time.LocalDate
 
 class ProgressRepository(private val dao: ProgressDao) {
@@ -53,20 +54,17 @@ class ProgressRepository(private val dao: ProgressDao) {
         if (starsEarned > 0) {
             dao.addStars(starsEarned)
         }
-        updateStreak()
     }
 
     private suspend fun ensureStatsExist() {
-        dao.upsertAppStats(
-            AppStats(
-                id = 1,
-                lastPlayDate = LocalDate.now().toString()
+        val existing = dao.getAppStats().firstOrNull()
+        if (existing == null) {
+            dao.upsertAppStats(
+                AppStats(
+                    id = 1,
+                    lastPlayDate = LocalDate.now().toString()
+                )
             )
-        )
-    }
-
-    private suspend fun updateStreak() {
-        val today = LocalDate.now().toString()
-        dao.upsertAppStats(AppStats(id = 1, lastPlayDate = today))
+        }
     }
 }

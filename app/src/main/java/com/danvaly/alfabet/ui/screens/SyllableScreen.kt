@@ -73,7 +73,7 @@ fun SyllableScreen(
     var currentSyllable by remember { mutableStateOf("") }
     val builtSyllables = remember { mutableStateListOf<String>() }
     var wordChallenge by remember { mutableStateOf<Pair<String, List<String>>?>(null) }
-    var wordProgress = remember { mutableStateListOf<String>() }
+    val wordProgress = remember { mutableStateListOf<String>() }
     var showWordComplete by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 

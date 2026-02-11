@@ -53,6 +53,10 @@ import com.danvaly.alfabet.ui.components.DrawingPath
 import com.danvaly.alfabet.ui.components.StarRating
 import com.danvaly.alfabet.ui.components.TracingCanvas
 import com.danvaly.alfabet.ui.components.calculateTraceScore
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import com.danvaly.alfabet.ui.components.LetterCard
 import com.danvaly.alfabet.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -317,16 +321,16 @@ fun TraceSelectorScreen(
                 )
             }
 
-            androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
-                columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 90.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 90.dp),
+                contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(RomanianAlphabet.letters.size) { index ->
                     val letter = RomanianAlphabet.letters[index]
-                    com.danvaly.alfabet.ui.components.LetterCard(
+                    LetterCard(
                         letter = letter,
                         onClick = {
                             soundManager?.speakLetter(letter.uppercase)

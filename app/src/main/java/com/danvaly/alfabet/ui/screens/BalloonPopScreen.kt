@@ -4,11 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
@@ -74,8 +72,7 @@ data class Balloon(
     val isTarget: Boolean,
     val color: Color,
     val x: Float,
-    val speed: Float,
-    var popped: Boolean = false
+    val speed: Float
 )
 
 @Composable
@@ -89,13 +86,14 @@ fun BalloonPopScreen(
     var timeLeft by remember { mutableIntStateOf(45) }
     var gameOver by remember { mutableStateOf(false) }
     val balloons = remember { mutableStateListOf<Balloon>() }
+    val poppedIds = remember { mutableStateListOf<Int>() }
     var balloonIdCounter by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val screenWidth = LocalConfiguration.current.screenWidthDp
 
     fun spawnBalloon() {
         val allLetters = RomanianAlphabet.letters.map { it.uppercase }
-        val isTarget = (0..2).random() == 0 // 33% chance of target
+        val isTarget = (0..2).random() == 0
         val letter = if (isTarget) targetLetter else allLetters.filter { it != targetLetter }.random()
         balloons.add(
             Balloon(
@@ -141,13 +139,15 @@ fun BalloonPopScreen(
         }
     }
 
-    // Cleanup old balloons
+    // Cleanup popped balloons periodically
     LaunchedEffect(Unit) {
         while (true) {
             delay(2000)
-            balloons.removeAll { it.popped }
+            balloons.removeAll { it.id in poppedIds }
+            poppedIds.clear()
             if (balloons.size > 20) {
-                balloons.removeRange(0, balloons.size - 15)
+                val toRemove = balloons.size - 15
+                repeat(toRemove) { balloons.removeFirstOrNull() }
             }
         }
     }
@@ -178,7 +178,6 @@ fun BalloonPopScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = PrimaryPink)
             }
 
-            // Target letter indicator
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = PrimaryPink)
@@ -192,7 +191,6 @@ fun BalloonPopScreen(
                 )
             }
 
-            // Score
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = CorrectGreen)
@@ -206,7 +204,6 @@ fun BalloonPopScreen(
                 )
             }
 
-            // Timer
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
@@ -214,7 +211,7 @@ fun BalloonPopScreen(
                 )
             ) {
                 Text(
-                    text = "⏱ ${timeLeft}s",
+                    text = "Timp: ${timeLeft}s",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
@@ -225,11 +222,11 @@ fun BalloonPopScreen(
 
         // Balloons
         if (!gameOver) {
-            balloons.filter { !it.popped }.forEach { balloon ->
+            balloons.filter { it.id !in poppedIds }.forEach { balloon ->
                 FloatingBalloon(
                     balloon = balloon,
                     onPop = {
-                        balloon.popped = true
+                        poppedIds.add(balloon.id)
                         if (balloon.isTarget) {
                             score++
                             soundManager.speakEncouragement(true)
@@ -296,6 +293,7 @@ fun BalloonPopScreen(
                                 timeLeft = 45
                                 gameOver = false
                                 balloons.clear()
+                                poppedIds.clear()
                                 balloonIdCounter = 0
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = CorrectGreen),
