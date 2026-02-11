@@ -4,9 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
@@ -91,6 +93,17 @@ fun BalloonPopScreen(
     val scope = rememberCoroutineScope()
     val screenWidth = LocalConfiguration.current.screenWidthDp
 
+    val infiniteTransition = rememberInfiniteTransition(label = "bg_anim")
+    val cloudOffset by infiniteTransition.animateFloat(
+        initialValue = -20f,
+        targetValue = 20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "clouds"
+    )
+
     fun spawnBalloon() {
         val allLetters = RomanianAlphabet.letters.map { it.uppercase }
         val isTarget = (0..2).random() == 0
@@ -102,7 +115,8 @@ fun BalloonPopScreen(
                 isTarget = letter == targetLetter,
                 color = BalloonColors.random(),
                 x = (50..(screenWidth - 100)).random().toFloat(),
-                speed = (3..6).random().toFloat()
+                // SLOWER speed: was 3-6, now 1.5-3 for gentler floating
+                speed = (15..30).random().toFloat() / 10f
             )
         )
     }
@@ -129,12 +143,12 @@ fun BalloonPopScreen(
         }
     }
 
-    // Spawn balloons
+    // Spawn balloons - slower spawn rate
     LaunchedEffect(gameOver) {
         if (!gameOver) {
             while (!gameOver) {
                 spawnBalloon()
-                delay((800L..1500L).random())
+                delay((1200L..2200L).random())
             }
         }
     }
@@ -157,10 +171,34 @@ fun BalloonPopScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB), Color(0xFF90CAF9))
+                    colors = listOf(Color(0xFF87CEEB), Color(0xFFB8E6FF), Color(0xFFE0F4FF))
                 )
             )
     ) {
+        // Floating clouds in background
+        Text(
+            text = "\u2601\uFE0F",
+            fontSize = 48.sp,
+            modifier = Modifier.offset(x = (40 + cloudOffset).dp, y = 80.dp)
+        )
+        Text(
+            text = "\u2601\uFE0F",
+            fontSize = 36.sp,
+            modifier = Modifier.offset(x = (screenWidth - 120 + cloudOffset).dp, y = 120.dp)
+        )
+        // Flowers at bottom
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            listOf("\uD83C\uDF3B", "\uD83C\uDF37", "\uD83C\uDF3A", "\uD83C\uDF3C", "\uD83C\uDF38", "\uD83C\uDF3B", "\uD83C\uDF37").forEach { flower ->
+                Text(text = flower, fontSize = 20.sp)
+            }
+        }
+
         // Header
         Row(
             modifier = Modifier
@@ -173,50 +211,68 @@ fun BalloonPopScreen(
                 onClick = onBack,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.7f))
+                    .background(Color.White.copy(alpha = 0.8f))
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = PrimaryPink)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoGreen)
             }
 
             Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = PrimaryPink)
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = DuoGreen)
             ) {
-                Text(
-                    text = "Gaseste: $targetLetter",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "\uD83C\uDF88", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Gaseste: $targetLetter",
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
 
             Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CorrectGreen)
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = DuoOrange)
             ) {
-                Text(
-                    text = "Scor: $score",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "\u2B50", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "$score",
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
 
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (timeLeft <= 10) WrongRed else SecondaryPurple
+                    containerColor = if (timeLeft <= 10) DuoRed else DuoBlue
                 )
             ) {
-                Text(
-                    text = "Timp: ${timeLeft}s",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "\u23F0", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${timeLeft}s",
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
         }
 
@@ -255,20 +311,24 @@ fun BalloonPopScreen(
                     modifier = Modifier.padding(40.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("🎈", fontSize = 64.sp)
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("\uD83C\uDF89", fontSize = 64.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Bravo!",
                         style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryPink
+                        fontWeight = FontWeight.Black,
+                        color = DuoGreen
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Scor: $score",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = OnBackground
-                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "\u2B50", fontSize = 28.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Scor: $score",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = OnBackground
+                        )
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                     StarRating(
                         stars = when {
@@ -283,9 +343,9 @@ fun BalloonPopScreen(
                         Button(
                             onClick = onBack,
                             colors = ButtonDefaults.buttonColors(containerColor = OnBackgroundLight),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(20.dp)
                         ) {
-                            Text("Inapoi")
+                            Text("Inapoi", fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -296,12 +356,12 @@ fun BalloonPopScreen(
                                 poppedIds.clear()
                                 balloonIdCounter = 0
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = CorrectGreen),
-                            shape = RoundedCornerShape(16.dp)
+                            colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
+                            shape = RoundedCornerShape(20.dp)
                         ) {
                             Icon(Icons.Filled.Refresh, "Joaca din nou")
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Joaca din nou")
+                            Text("Joaca din nou", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -317,12 +377,13 @@ private fun FloatingBalloon(
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "balloon_${balloon.id}")
 
+    // MUCH SLOWER vertical movement: was 6000/speed, now 12000/speed
     val yOffset by infiniteTransition.animateFloat(
         initialValue = 600f,
         targetValue = -200f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = (6000 / balloon.speed).toInt(),
+                durationMillis = (12000 / balloon.speed).toInt(),
                 easing = LinearEasing
             ),
             repeatMode = RepeatMode.Restart
@@ -330,11 +391,12 @@ private fun FloatingBalloon(
         label = "y_${balloon.id}"
     )
 
+    // Gentler wobble
     val xWobble by infiniteTransition.animateFloat(
-        initialValue = -15f,
-        targetValue = 15f,
+        initialValue = -12f,
+        targetValue = 12f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
+            animation = tween(1500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "wobble_${balloon.id}"
@@ -342,13 +404,11 @@ private fun FloatingBalloon(
 
     val scale = remember { Animatable(1f) }
 
+    // Balloon with gradient effect
     Box(
         modifier = Modifier
             .offset(x = (balloon.x + xWobble).dp, y = yOffset.dp)
-            .size(80.dp)
             .scale(scale.value)
-            .clip(CircleShape)
-            .background(balloon.color)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -356,12 +416,29 @@ private fun FloatingBalloon(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = balloon.letter,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        // Balloon body - oval shape
+        Box(
+            modifier = Modifier
+                .size(width = 72.dp, height = 88.dp)
+                .clip(RoundedCornerShape(50))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            balloon.color.copy(alpha = 0.7f),
+                            balloon.color,
+                            balloon.color.copy(alpha = 0.9f)
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = balloon.letter,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
