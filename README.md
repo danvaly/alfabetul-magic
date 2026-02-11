@@ -9,7 +9,7 @@
 <h1 align="center">Alfabetul Magic Ad Free</h1>
 
 <p align="center">
-  <strong>A fun, Duolingo-inspired Android app that teaches kids the Romanian alphabet through interactive games, handwriting practice, and animated stories.</strong>
+  <strong>A fun, Duolingo-inspired Android app that teaches kids the Romanian alphabet through interactive games, handwriting practice, and animated stories. 100% free</strong>
 </p>
 
 <p align="center">
