@@ -66,19 +66,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Delete existing release if it exists (e.g. from a previous failed run)
+          gh release delete "${{ github.ref_name }}" --yes 2>/dev/null || true
+
           gh release create "${{ github.ref_name }}" \
             "app/build/outputs/apk/release/alfabetul-magic-v${{ steps.version.outputs.VERSION }}.apk" \
             --title "Alfabetul Magic v${{ steps.version.outputs.VERSION }}" \
             --notes "## Alfabetul Magic v${{ steps.version.outputs.VERSION }}
 
-            Aplicație educațională pentru învățarea alfabetului românesc.
+          Aplicație educațională pentru învățarea alfabetului românesc.
 
-            ### Descarcă
-            Descarcă fișierul APK de mai jos și instalează-l pe tableta ta Android.
+          ### Descarcă
+          Descarcă fișierul APK de mai jos și instalează-l pe tableta ta Android.
 
-            ### Ce este nou
-            - Consultă commit-urile pentru detalii" \
-              app/build/outputs/apk/release/alfabetul-magic-v${{ steps.version.outputs.VERSION }}.apk
+          ### Ce este nou
+          - Consultă commit-urile pentru detalii"
 
       - name: Upload release APK as artifact
         uses: actions/upload-artifact@v4
