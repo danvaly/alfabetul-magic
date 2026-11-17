@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import com.danvaly.alfabet.data.RomanianAlphabet
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
 import kotlin.coroutines.resume
@@ -152,6 +154,58 @@ class SoundManager(context: Context) {
         })
 
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "await_$text")
+    }
+
+    private var pendingStep: CancellableContinuation<Boolean>? = null
+    private var stepCounter = 0
+
+    /**
+     * Speaks [text] and suspends until it has been spoken, so the screen can
+     * highlight letters, syllables and words in step with the voice.
+     * Returns false when nothing was spoken (no Romanian voice, or interrupted).
+     */
+    suspend fun speakStep(text: String, rate: Float = 0.75f, pitch: Float = 1.05f): Boolean {
+        if (!isReady || text.isBlank()) return false
+        return suspendCancellableCoroutine { cont ->
+            val engine = tts
+            if (engine == null) {
+                cont.resume(false)
+                return@suspendCancellableCoroutine
+            }
+            // A newer step replaces the listener, so release whoever was still waiting.
+            pendingStep?.takeIf { it.isActive }?.resume(false)
+            pendingStep = cont
+            val id = "step_${stepCounter++}"
+
+            engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {}
+                override fun onDone(utteranceId: String?) = finish(utteranceId, true)
+                @Deprecated("Deprecated in Java")
+                override fun onError(utteranceId: String?) = finish(utteranceId, false)
+                override fun onStop(utteranceId: String?, interrupted: Boolean) =
+                    finish(utteranceId, false)
+
+                private fun finish(utteranceId: String?, spoken: Boolean) {
+                    if (utteranceId == id && cont.isActive) cont.resume(spoken)
+                }
+            })
+            cont.invokeOnCancellation { engine.stop() }
+
+            engine.setSpeechRate(rate)
+            engine.setPitch(pitch)
+            val result = engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, id)
+            engine.setSpeechRate(0.82f)
+            engine.setPitch(1.1f)
+            if (result != TextToSpeech.SUCCESS && cont.isActive) cont.resume(false)
+        }
+    }
+
+    /** The sound a letter tile makes, e.g. "m" -> "mă"; letter groups are read as written. */
+    fun soundOf(unit: String): String {
+        val key = unit.lowercase()
+        phoneticHints[key]?.let { return it }
+        if (key.length > 1) return key
+        return RomanianAlphabet.getLetterByUppercase(unit.uppercase())?.phoneticSound ?: key
     }
 
     fun stop() {

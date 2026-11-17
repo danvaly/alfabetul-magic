@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -65,6 +67,8 @@ fun HomeScreen(
     onNavigateToProgress: () -> Unit,
     onNavigateToDailyChallenge: () -> Unit,
     onNavigateToParentDashboard: () -> Unit,
+    onNavigateToStories: () -> Unit,
+    onNavigateToReadingTrainer: () -> Unit,
     soundManager: SoundManager
 ) {
     val titleScale = remember { Animatable(0.3f) }
@@ -271,11 +275,31 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Bottom row: Daily Challenge + Parent Dashboard
+            // Bottom row: Reading + Daily Challenge + Parent Dashboard
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
             ) {
+                GameModeCard(
+                    title = "Citesc\nPas cu Pas",
+                    emoji = "\uD83D\uDC63",
+                    icon = Icons.Filled.School,
+                    backgroundColor = Color(0xFF5C6BC0),
+                    shadowColor = Color(0xFF3949AB),
+                    onClick = onNavigateToReadingTrainer,
+                    modifier = Modifier.weight(1f),
+                    cardHeight = 140
+                )
+                GameModeCard(
+                    title = "Pove\u0219ti\nde Citit",
+                    emoji = "\uD83D\uDCDA",
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    backgroundColor = Color(0xFF00ACC1),
+                    shadowColor = Color(0xFF00838F),
+                    onClick = onNavigateToStories,
+                    modifier = Modifier.weight(1f),
+                    cardHeight = 140
+                )
                 GameModeCard(
                     title = "Provocarea\nZilei",
                     emoji = "\uD83C\uDF1F",

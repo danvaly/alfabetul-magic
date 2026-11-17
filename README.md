@@ -36,6 +36,9 @@ Every screen is landscape-optimized for tablet and phone use, with large touch t
 | **Scrie Literele** | Handwriting practice with a guided tracing canvas and zone-based scoring (1-3 stars) |
 | **Formeaza Silabe** | Combine consonants and vowels to form syllables and simple words |
 | **Povesti cu Litere** | Animated letter stories with TTS narration for each letter |
+| **Citesc Pas cu Pas** | Guided reading trainer: sound out the letters, join them into syllables, read the whole word, then pick the matching picture. 4 levels (simple syllables, new words, long words, letter groups ce/ci/ge/gi/che/chi/ghe/ghi) |
+| **Povești de Citit** | 8 illustrated, animated short stories in 3 levels, written in short sentences. Syllable view (ma-ma) or whole words, upper/lower case, slow voice, "listen" and "read together" with highlighting, and comprehension questions at the end |
+| **Analiza cuvântului** | Tap any word in a story to take it apart: letters (vowels / consonants / letter groups), syllables, whole word, with a step-by-step playback |
 
 ### Games (8 mini-games)
 

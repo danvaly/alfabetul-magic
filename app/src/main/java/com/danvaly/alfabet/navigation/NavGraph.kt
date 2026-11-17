@@ -29,6 +29,8 @@ fun AlfabetNavGraph(
                 onNavigateToProgress = { navController.navigate(Screen.Progress.route) },
                 onNavigateToDailyChallenge = { navController.navigate(Screen.DailyChallenge.route) },
                 onNavigateToParentDashboard = { navController.navigate(Screen.ParentDashboard.route) },
+                onNavigateToStories = { navController.navigate(Screen.Stories.route) },
+                onNavigateToReadingTrainer = { navController.navigate(Screen.ReadingTrainer.route) },
                 soundManager = soundManager
             )
         }
@@ -194,6 +196,35 @@ fun AlfabetNavGraph(
 
         composable(Screen.AlphabetOrder.route) {
             AlphabetOrderScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.Stories.route) {
+            StoriesScreen(
+                onStoryClick = { storyId ->
+                    navController.navigate(Screen.StoryReader.createRoute(storyId))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.StoryReader.route,
+            arguments = listOf(navArgument("storyId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            StoryReaderScreen(
+                storyId = backStackEntry.arguments?.getString("storyId").orEmpty(),
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.ReadingTrainer.route) {
+            ReadingTrainerScreen(
                 onBack = { navController.popBackStack() },
                 soundManager = soundManager,
                 repository = repository
