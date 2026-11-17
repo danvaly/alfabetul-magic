@@ -34,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Extension
@@ -90,6 +91,7 @@ fun HomeScreen(
     onNavigateToParentDashboard: () -> Unit,
     onNavigateToReading: () -> Unit,
     onNavigateToStickers: () -> Unit,
+    onNavigateToEnglish: () -> Unit,
     onProfileSelected: (String) -> Unit,
     soundManager: SoundManager
 ) {
@@ -325,6 +327,16 @@ fun HomeScreen(
                     shadowColor = Color(0xFF3949AB),
                     onClick = onNavigateToReading,
                     modifier = Modifier.weight(2f),
+                    cardHeight = 160
+                )
+                GameModeCard(
+                    title = "Engleză\nEnglish",
+                    emoji = "🌍",
+                    icon = Icons.Filled.Language,
+                    backgroundColor = Color(0xFF0288D1),
+                    shadowColor = Color(0xFF01579B),
+                    onClick = onNavigateToEnglish,
+                    modifier = Modifier.weight(1f),
                     cardHeight = 160
                 )
                 GameModeCard(

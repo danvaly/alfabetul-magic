@@ -288,10 +288,10 @@ private fun EnglishTaskView(
                         }
                     }
                     EnglishTaskType.SAY -> {
-                        EnglishPicture(word = word, size = 84.dp)
+                        EnglishPicture(word = word, size = if (feedback == null) 84.dp else 56.dp)
                         Text(
                             text = word.ro,
-                            fontSize = 28.sp,
+                            fontSize = if (feedback == null) 28.sp else 24.sp,
                             lineHeight = 32.sp,
                             fontWeight = FontWeight.Black,
                             color = OnBackground,
@@ -304,7 +304,8 @@ private fun EnglishTaskView(
                         text = feedback,
                         color = if (solved) DuoGreen else DuoOrange,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
                         textAlign = TextAlign.Center
                     )
                 }

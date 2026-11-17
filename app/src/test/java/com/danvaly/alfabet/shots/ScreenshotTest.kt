@@ -20,6 +20,9 @@ import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.LocalProfileManager
 import com.danvaly.alfabet.ui.LocalReadingStore
 import com.danvaly.alfabet.ui.screens.ConfusableLettersScreen
+import com.danvaly.alfabet.ui.screens.EnglishHubScreen
+import com.danvaly.alfabet.ui.screens.EnglishLearnScreen
+import com.danvaly.alfabet.ui.screens.EnglishQuizScreen
 import com.danvaly.alfabet.ui.screens.HardWordsScreen
 import com.danvaly.alfabet.ui.screens.HomeScreen
 import com.danvaly.alfabet.ui.screens.ParentDashboardScreen
@@ -101,7 +104,7 @@ class ScreenshotTest {
         rule.onRoot().captureRoboImage("build/shots/$name.png")
     }
 
-    @Test fun home() = shot("01_home") { s, _ -> HomeScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, s) }
+    @Test fun home() = shot("01_home") { s, _ -> HomeScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, s) }
     @Test fun hub() = shot("02_citesc_hub") { _, _ -> ReadingHubScreen({}, {}, {}, {}, {}, {}, {}) }
     @Test fun stories() = shot("03_povesti") { _, _ -> StoriesScreen({}, {}) }
     @Test fun reader() = shot("04_poveste") { s, r -> StoryReaderScreen("ana_pisica", {}, s, r) }
@@ -123,4 +126,15 @@ class ScreenshotTest {
     @Test fun progress() = shot("15_progres") { _, r -> ProgressScreen({}, r) }
     @Test fun parent() = shot("16_panou_parinti") { _, r -> ParentDashboardScreen({}, r) }
     @Test fun syllable() = shot("17_formeaza_silabe") { s, r -> SyllableScreen({}, s, r) }
+    @Test fun englishHub() = shot("30_engleza") { s, _ -> EnglishHubScreen({}, {}, s) }
+    @Test fun englishLearn() = shot("31_engleza_cartonase") { s, _ -> EnglishLearnScreen("familia", {}, {}, s) }
+    @Test fun englishLearnColour() = shot("32_engleza_culori", List(9) { "Înainte" }) { s, _ ->
+        EnglishLearnScreen("culori", {}, {}, s)
+    }
+    @Test fun englishQuiz1() = shot("33_engleza_joc_a") { s, r -> EnglishQuizScreen("animale", {}, {}, s, r, seed = 1) }
+    @Test fun englishQuiz2() = shot("34_engleza_joc_b") { s, r -> EnglishQuizScreen("salutari", {}, {}, s, r, seed = 2) }
+    @Test fun englishQuiz3() = shot("35_engleza_joc_c") { s, r -> EnglishQuizScreen("culori", {}, {}, s, r, seed = 3) }
+    @Test fun englishQuizWrong() = shot("36_engleza_joc_greseala", listOf("white")) { s, r ->
+        EnglishQuizScreen("culori", {}, {}, s, r, seed = 3)
+    }
 }

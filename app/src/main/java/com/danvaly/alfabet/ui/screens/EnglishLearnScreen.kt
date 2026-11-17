@@ -149,8 +149,7 @@ fun EnglishLearnScreen(
                         .fillMaxHeight()
                         .clickable { soundManager.speakEnglish(word.en) },
                     shape = RoundedCornerShape(28.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(

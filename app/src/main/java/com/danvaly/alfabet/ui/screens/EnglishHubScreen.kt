@@ -252,7 +252,9 @@ internal fun EnglishStepLabel(text: String, modifier: Modifier = Modifier) {
         text = text,
         color = EnglishInk,
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 18.sp,
+        fontSize = 17.sp,
+        lineHeight = 21.sp,
+        textAlign = TextAlign.Center,
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
             .background(EnglishInk.copy(alpha = 0.1f))

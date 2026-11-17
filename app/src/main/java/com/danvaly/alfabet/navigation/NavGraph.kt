@@ -32,6 +32,7 @@ fun AlfabetNavGraph(
                 onNavigateToParentDashboard = { navController.navigate(Screen.ParentDashboard.route) },
                 onNavigateToReading = { navController.navigate(Screen.ReadingHub.route) },
                 onNavigateToStickers = { navController.navigate(Screen.StickerAlbum.route) },
+                onNavigateToEnglish = { navController.navigate(Screen.EnglishHub.route) },
                 onProfileSelected = onProfileSelected,
                 soundManager = soundManager
             )
