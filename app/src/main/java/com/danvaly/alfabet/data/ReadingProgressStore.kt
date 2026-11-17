@@ -187,6 +187,16 @@ class ReadingProgressStore(private val kv: KeyValueStore) {
         get() = kv.getBoolean("slow_voice", false)
         set(value) = kv.putBoolean("slow_voice", value)
 
+    /** Story text in school cursive ("litere de mână"). */
+    var handwriting: Boolean
+        get() = kv.getBoolean("handwriting", false)
+        set(value) = kv.putBoolean("handwriting", value)
+
+    /** Letter tracing uses the cursive letter shapes. */
+    var traceHandwriting: Boolean
+        get() = kv.getBoolean("trace_handwriting", false)
+        set(value) = kv.putBoolean("trace_handwriting", value)
+
     companion object {
         const val DEFAULT_PREFS = "reading_progress"
         const val DEFAULT_GOAL = 10

@@ -1,5 +1,41 @@
 package com.danvaly.alfabet.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.danvaly.alfabet.audio.ReadingListener
+import com.danvaly.alfabet.audio.VoiceRecorder
+import com.danvaly.alfabet.data.markedOf
+import com.danvaly.alfabet.data.matchRead
+import com.danvaly.alfabet.ui.components.cursiveSyllables
+import com.danvaly.alfabet.ui.theme.HandwritingFont
+import com.danvaly.alfabet.ui.theme.HandwritingScale
+import com.danvaly.alfabet.ui.theme.PrimaryPinkDark
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -223,6 +259,16 @@ private enum class ReaderPhase { READING, QUESTIONS, DONE }
 /** Which word (and, when reading by syllables, which syllable) the voice is on. */
 private data class ReadSpot(val word: Int, val syllable: Int? = null)
 
+/** What the microphone is doing on the current page. */
+private enum class MicMode { IDLE, RECORDING, PLAYING, LISTENING }
+
+private enum class MicAction { RECORD, LISTEN }
+
+private val RecordColor = DuoRed
+private val PlayMeColor = PrimaryPinkDark
+private val ListenMeColor = StoryInk
+private val HeardGreen = Color(0xFF2E7D32)
+
 @Composable
 fun StoryReaderScreen(
     storyId: String,
@@ -232,6 +278,8 @@ fun StoryReaderScreen(
 ) {
     val story = remember(storyId) { ReadingContent.getStory(storyId) ?: ReadingContent.stories.first() }
     val store = LocalReadingStore.current
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
     // Stickers already owned when the story was opened; anything after that is new.
     val stickersAtStart = remember { store.stickers().size }
@@ -242,28 +290,217 @@ fun StoryReaderScreen(
     var showSyllables by remember { mutableStateOf(store.showSyllables) }
     var uppercase by remember { mutableStateOf(store.uppercase) }
     var slowVoice by remember { mutableStateOf(store.slowVoice) }
+    var handwriting by remember { mutableStateOf(store.handwriting) }
     var spot by remember { mutableStateOf<ReadSpot?>(null) }
     var readingJob by remember { mutableStateOf<Job?>(null) }
     var analysedWord by remember { mutableStateOf<ReadingWord?>(null) }
     var earnedStars by remember { mutableIntStateOf(0) }
 
+    // Microphone: "Mă înregistrez", "Ascultă-mă" and "Citesc eu".
+    val recorder = remember { VoiceRecorder(context) }
+    val listener = remember { ReadingListener(context) }
+    var micMode by remember { mutableStateOf(MicMode.IDLE) }
+    var recordingsVersion by remember { mutableIntStateOf(0) }
+    var pendingMic by remember { mutableStateOf<MicAction?>(null) }
+    var heard by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var missed by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var message by remember { mutableStateOf<String?>(null) }
+
     val page = story.pages[pageIndex]
     val pace = if (slowVoice) 0.75f else 1f
+    val recordKey = "${story.id}_$pageIndex"
+    val hasMyRecording = remember(recordKey, recordingsVersion) { recorder.hasRecording(recordKey) }
 
-    fun stopReading() {
+    fun stopMic() {
+        when (micMode) {
+            MicMode.RECORDING -> {
+                recorder.stopRecording()
+                recordingsVersion++
+            }
+            MicMode.PLAYING -> recorder.stopPlaying()
+            MicMode.LISTENING -> listener.cancel()
+            MicMode.IDLE -> Unit
+        }
+        micMode = MicMode.IDLE
+    }
+
+    fun stopVoice() {
         readingJob?.cancel()
         readingJob = null
         spot = null
         soundManager.stop()
     }
 
+    fun stopReading() {
+        stopVoice()
+        stopMic()
+    }
+
     fun goToPage(index: Int) {
         stopReading()
+        heard = emptySet()
+        missed = emptySet()
+        message = null
         pageIndex = index
     }
 
+    fun startRecording() {
+        stopReading()
+        heard = emptySet()
+        missed = emptySet()
+        val started = recorder.startRecording(recordKey, maxSeconds = 60) {
+            micMode = MicMode.IDLE
+            recordingsVersion++
+            message = "Gata! Acum apasă pe căști 🎧 ca să te asculți."
+        }
+        if (started) {
+            micMode = MicMode.RECORDING
+            message = null
+        } else {
+            message = "Nu pot porni microfonul acum. Mai încearcă puțin mai târziu."
+        }
+    }
+
+    fun stopRecording() {
+        val saved = recorder.stopRecording()
+        micMode = MicMode.IDLE
+        recordingsVersion++
+        message = if (saved) {
+            "Bravo! Acum apasă pe căști 🎧 ca să te asculți."
+        } else {
+            "Nu s-a auzit nimic. Apasă pe microfon și citește cu voce tare."
+        }
+    }
+
+    fun playMe() {
+        if (micMode == MicMode.PLAYING) {
+            stopMic()
+            return
+        }
+        stopReading()
+        if (!hasMyRecording) {
+            message = "Mai întâi apasă pe microfon 🎤 și citește pagina."
+            return
+        }
+        if (recorder.play(recordKey) { if (micMode == MicMode.PLAYING) micMode = MicMode.IDLE }) {
+            micMode = MicMode.PLAYING
+            message = null
+        } else {
+            message = "Nu pot pune înregistrarea acum."
+        }
+    }
+
+    fun finishListening(problem: String?) {
+        micMode = MicMode.IDLE
+        val words = page.words
+        if (heard.isEmpty()) {
+            missed = emptySet()
+            message = problem ?: "Nu te-am auzit bine. Apasă din nou și citește cu voce tare."
+            return
+        }
+        // Words after the last one heard were probably not reached yet: they are not mistakes.
+        val last = heard.max()
+        missed = (0 until last).filter { it !in heard }.toSet()
+        words.forEachIndexed { index, word ->
+            when (index) {
+                in heard -> store.recordSuccess(markedOf(word))
+                in missed -> store.recordMistake(markedOf(word))
+            }
+        }
+        val total = words.size
+        val read = heard.size
+        val of = if (total >= 20) "de cuvinte" else "cuvinte"
+        message = when {
+            read >= total -> "Ai citit bine toate cele $total $of! Bravo! 🎉"
+            missed.size == 1 -> "Ai citit bine $read din $total $of. " +
+                "Mai încearcă acest cuvânt: ${words[missed.first()].text.cased(uppercase)}"
+            missed.isNotEmpty() -> "Ai citit bine $read din $total $of. " +
+                "Mai încearcă cuvintele colorate cu portocaliu."
+            else -> "Ai citit bine $read din $total $of. Continuă tot așa!"
+        }
+        if (read >= total) soundManager.speakEncouragement(true)
+    }
+
+    fun startListening() {
+        stopReading()
+        heard = emptySet()
+        missed = emptySet()
+        if (!listener.isAvailable) {
+            message = "Ascultarea este indisponibilă pe acest dispozitiv."
+            return
+        }
+        val expected = page.words.map { it.text }
+        val started = listener.start(object : ReadingListener.Callbacks {
+            override fun onReady() {
+                message = "🎤 Te ascult! Citește cu voce tare."
+            }
+
+            override fun onHeard(text: String) {
+                heard = heard + matchRead(expected, text)
+            }
+
+            override fun onFinished(texts: List<String>, problem: String?) {
+                texts.firstOrNull()?.let { heard = heard + matchRead(expected, it) }
+                finishListening(problem)
+            }
+        })
+        if (started) {
+            micMode = MicMode.LISTENING
+            message = "Pregătesc urechile… 👂"
+        } else {
+            message = "Nu pot asculta acum. Mai încearcă puțin mai târziu."
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val action = pendingMic
+        pendingMic = null
+        if (granted) {
+            when (action) {
+                MicAction.RECORD -> startRecording()
+                MicAction.LISTEN -> startListening()
+                null -> Unit
+            }
+        } else {
+            message = "Pentru asta am nevoie de microfon. Roagă un părinte să-l permită din Setări."
+        }
+    }
+
+    fun withMicrophone(action: MicAction) {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            when (action) {
+                MicAction.RECORD -> startRecording()
+                MicAction.LISTEN -> startListening()
+            }
+        } else {
+            stopReading()
+            pendingMic = action
+            try {
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            } catch (e: Exception) {
+                pendingMic = null
+                message = "Nu pot folosi microfonul pe acest dispozitiv."
+            }
+        }
+    }
+
     DisposableEffect(Unit) {
-        onDispose { soundManager.stop() }
+        onDispose {
+            soundManager.stop()
+            recorder.release()
+            listener.destroy()
+        }
+    }
+
+    // Leaving the app stops the microphone (a finished part of a recording is kept).
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) stopReading()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Box(
@@ -350,11 +587,18 @@ fun StoryReaderScreen(
                         ReaderPhase.READING -> ReadingPane(
                             words = page.words,
                             spot = spot,
+                            heard = heard,
+                            missed = missed,
                             showSyllables = showSyllables,
                             uppercase = uppercase,
                             slowVoice = slowVoice,
+                            handwriting = handwriting,
                             isFirstPage = pageIndex == 0,
                             isLastPage = pageIndex == story.pages.lastIndex,
+                            micMode = micMode,
+                            hasMyRecording = hasMyRecording,
+                            canListen = listener.isAvailable,
+                            message = message,
                             onToggleSyllables = {
                                 showSyllables = it
                                 store.showSyllables = it
@@ -367,18 +611,24 @@ fun StoryReaderScreen(
                                 slowVoice = !slowVoice
                                 store.slowVoice = slowVoice
                             },
+                            onToggleHandwriting = {
+                                handwriting = !handwriting
+                                store.handwriting = handwriting
+                            },
                             onWordClick = { word ->
                                 stopReading()
                                 analysedWord = word
                             },
                             onListen = {
                                 stopReading()
+                                message = null
                                 readingJob = scope.launch {
                                     soundManager.speakPaced(ReadingText.plain(page.words), 0.8f * pace)
                                 }
                             },
                             onReadTogether = {
                                 stopReading()
+                                message = null
                                 val words = page.words
                                 val bySyllables = showSyllables
                                 readingJob = scope.launch {
@@ -396,12 +646,27 @@ fun StoryReaderScreen(
                                     spot = null
                                 }
                             },
+                            onRecord = {
+                                if (micMode == MicMode.RECORDING) stopRecording() else withMicrophone(MicAction.RECORD)
+                            },
+                            onPlayMe = { playMe() },
+                            onListenMe = {
+                                when {
+                                    micMode == MicMode.LISTENING -> listener.stop()
+                                    !listener.isAvailable -> {
+                                        stopReading()
+                                        message = "Ascultarea este indisponibilă pe acest dispozitiv."
+                                    }
+                                    else -> withMicrophone(MicAction.LISTEN)
+                                }
+                            },
                             onPrevious = { goToPage(pageIndex - 1) },
                             onNext = {
                                 if (pageIndex < story.pages.lastIndex) {
                                     goToPage(pageIndex + 1)
                                 } else {
                                     stopReading()
+                                    message = null
                                     phase = ReaderPhase.QUESTIONS
                                 }
                             }
@@ -422,7 +687,9 @@ fun StoryReaderScreen(
                         )
 
                         ReaderPhase.DONE -> Column(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -453,7 +720,7 @@ fun StoryReaderScreen(
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Button(
                                     onClick = {
-                                        pageIndex = 0
+                                        goToPage(0)
                                         newStickers = emptyList()
                                         phase = ReaderPhase.READING
                                     },
@@ -486,7 +753,8 @@ fun StoryReaderScreen(
             word = word,
             uppercase = uppercase,
             soundManager = soundManager,
-            onDismiss = { analysedWord = null }
+            onDismiss = { analysedWord = null },
+            handwriting = handwriting
         )
     }
 }
@@ -496,35 +764,51 @@ fun StoryReaderScreen(
 private fun ReadingPane(
     words: List<ReadingWord>,
     spot: ReadSpot?,
+    heard: Set<Int>,
+    missed: Set<Int>,
     showSyllables: Boolean,
     uppercase: Boolean,
     slowVoice: Boolean,
+    handwriting: Boolean,
     isFirstPage: Boolean,
     isLastPage: Boolean,
+    micMode: MicMode,
+    hasMyRecording: Boolean,
+    canListen: Boolean,
+    message: String?,
     onToggleSyllables: (Boolean) -> Unit,
     onToggleUppercase: () -> Unit,
     onToggleSlow: () -> Unit,
+    onToggleHandwriting: () -> Unit,
     onWordClick: (ReadingWord) -> Unit,
     onListen: () -> Unit,
     onReadTogether: () -> Unit,
+    onRecord: () -> Unit,
+    onPlayMe: () -> Unit,
+    onListenMe: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
     val compact = LocalConfiguration.current.screenHeightDp < 400
     val textSize = if (compact) 30.sp else 38.sp
+    val cursiveSize = textSize * HandwritingScale
 
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(6.dp))
 
         // How the text is shown
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TogglePill("ma-ma", "Arată silabele", showSyllables, DuoOrange) { onToggleSyllables(true) }
             TogglePill("mama", "Arată cuvintele întregi", !showSyllables, DuoOrange) { onToggleSyllables(false) }
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(6.dp))
             TogglePill(if (uppercase) "ABC" else "abc", "Litere mari sau mici", uppercase, DuoPurple, onToggleUppercase)
+            TogglePill("✍ de mână", "Litere de mână", handwriting, DuoBlue, onToggleHandwriting)
             TogglePill("🐢", "Voce mai lentă", slowVoice, DuoGreen, onToggleSlow)
         }
 
@@ -538,96 +822,166 @@ private fun ReadingPane(
         ) {
             FlowRow(
                 modifier = Modifier.padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(if (showSyllables) 14.dp else 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (showSyllables && !handwriting) 14.dp else 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 words.forEachIndexed { index, word ->
                     val wordSpot = spot?.takeIf { it.word == index }
+                    val wasHeard = index in heard
+                    val background = when {
+                        wordSpot != null && wordSpot.syllable == null -> DuoYellow.copy(alpha = 0.55f)
+                        wasHeard -> DuoGreen.copy(alpha = 0.25f)
+                        index in missed -> DuoOrange.copy(alpha = 0.2f)
+                        else -> Color.Transparent
+                    }
+                    val plainInk = if (wasHeard) HeardGreen else OnBackground
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                if (wordSpot != null && wordSpot.syllable == null) DuoYellow.copy(alpha = 0.55f)
-                                else Color.Transparent
-                            )
+                            .background(background)
                             .clickable { onWordClick(word) }
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (showSyllables) {
-                            word.syllables.forEachIndexed { s, syllable ->
-                                if (s > 0) {
+                        if (handwriting) {
+                            // One connected cursive run per word; syllables are told apart by colour only,
+                            // because a "-" or separate pieces would break the joined letters.
+                            val text = buildAnnotatedString {
+                                if (showSyllables) {
+                                    append(cursiveSyllables(word.syllables, uppercase, wordSpot?.syllable))
+                                } else {
+                                    withStyle(SpanStyle(color = plainInk)) { append(word.text.cased(uppercase)) }
+                                }
+                                withStyle(SpanStyle(color = OnBackground)) { append(word.trailing) }
+                            }
+                            Text(
+                                text = text,
+                                fontSize = cursiveSize,
+                                fontFamily = HandwritingFont,
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            if (showSyllables) {
+                                word.syllables.forEachIndexed { s, syllable ->
+                                    if (s > 0) {
+                                        Text(
+                                            text = "-",
+                                            fontSize = textSize,
+                                            fontWeight = FontWeight.Bold,
+                                            color = OnBackgroundLight.copy(alpha = 0.5f)
+                                        )
+                                    }
                                     Text(
-                                        text = "-",
+                                        text = syllable.cased(uppercase),
                                         fontSize = textSize,
-                                        fontWeight = FontWeight.Bold,
-                                        color = OnBackgroundLight.copy(alpha = 0.5f)
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = syllableInk(s),
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(
+                                                if (wordSpot?.syllable == s) DuoYellow.copy(alpha = 0.55f)
+                                                else Color.Transparent
+                                            )
                                     )
                                 }
+                            } else {
                                 Text(
-                                    text = syllable.cased(uppercase),
+                                    text = word.text.cased(uppercase),
                                     fontSize = textSize,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = syllableInk(s),
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(
-                                            if (wordSpot?.syllable == s) DuoYellow.copy(alpha = 0.55f)
-                                            else Color.Transparent
-                                        )
+                                    color = plainInk
                                 )
                             }
-                        } else {
-                            Text(
-                                text = word.text.cased(uppercase),
-                                fontSize = textSize,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = OnBackground
-                            )
-                        }
-                        if (word.trailing.isNotEmpty()) {
-                            Text(
-                                text = word.trailing,
-                                fontSize = textSize,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = OnBackground
-                            )
+                            if (word.trailing.isNotEmpty()) {
+                                Text(
+                                    text = word.trailing,
+                                    fontSize = textSize,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = OnBackground
+                                )
+                            }
                         }
                     }
                 }
             }
         }
 
+        // What is happening right now, or the usual hint
+        val status = message ?: when (micMode) {
+            MicMode.RECORDING -> "🔴 Te înregistrez… Citește cu voce tare, apoi apasă pe pătrat."
+            MicMode.PLAYING -> "🎧 Așa ai citit tu!"
+            MicMode.LISTENING -> "🎤 Te ascult! Citește cu voce tare."
+            MicMode.IDLE -> "👆 Atinge un cuvânt ca să-l desfaci în litere și silabe"
+        }
         Text(
-            text = "👆 Atinge un cuvânt ca să-l desfaci în litere și silabe",
-            color = OnBackgroundLight,
+            text = status,
+            color = when {
+                micMode == MicMode.RECORDING -> RecordColor
+                message != null -> StoryInk
+                else -> OnBackgroundLight
+            },
             fontSize = 13.sp,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            fontWeight = if (message != null || micMode != MicMode.IDLE) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
         )
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Controls
+        // Controls: the app reads (orange, purple) | I read (red, pink, teal) | pages (blue, green)
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            NavButton(Icons.AutoMirrored.Filled.ArrowBack, "Pagina dinainte", !isFirstPage, DuoBlue, onPrevious)
+            RoundAction(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                description = "Pagina dinainte",
+                color = DuoBlue,
+                dimmed = isFirstPage,
+                onClick = { if (!isFirstPage) onPrevious() }
+            )
             Spacer(modifier = Modifier.weight(1f))
-            ActionButton(Icons.AutoMirrored.Filled.VolumeUp, "Ascultă", DuoOrange, onListen)
-            ActionButton(Icons.Filled.TouchApp, "Citim împreună", DuoPurple, onReadTogether)
+            ControlGroup(DuoOrange) {
+                RoundAction(Icons.AutoMirrored.Filled.VolumeUp, "Ascultă", DuoOrange, onClick = onListen)
+                RoundAction(Icons.Filled.TouchApp, "Citim împreună", DuoPurple, onClick = onReadTogether)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            ControlGroup(RecordColor) {
+                val recording = micMode == MicMode.RECORDING
+                RoundAction(
+                    icon = if (recording) Icons.Filled.Stop else Icons.Filled.Mic,
+                    description = if (recording) "Oprește înregistrarea" else "Mă înregistrez",
+                    color = RecordColor,
+                    pulse = recording,
+                    onClick = onRecord
+                )
+                val playing = micMode == MicMode.PLAYING
+                RoundAction(
+                    icon = if (playing) Icons.Filled.Stop else Icons.Filled.Headphones,
+                    description = if (playing) "Oprește" else "Ascultă-mă",
+                    color = PlayMeColor,
+                    dimmed = !hasMyRecording && !playing,
+                    onClick = onPlayMe
+                )
+                val listening = micMode == MicMode.LISTENING
+                RoundAction(
+                    icon = if (listening) Icons.Filled.Stop else Icons.Filled.RecordVoiceOver,
+                    description = if (listening) "Am terminat de citit" else "Citesc eu (nou)",
+                    color = ListenMeColor,
+                    dimmed = !canListen,
+                    pulse = listening,
+                    badge = if (canListen) "nou" else null,
+                    onClick = onListenMe
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             if (isLastPage) {
-                Button(
-                    onClick = onNext,
-                    colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
-                    shape = RoundedCornerShape(20.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
-                ) {
-                    Text("Întrebări ❓", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                }
+                RoundAction(Icons.Filled.QuestionMark, "Întrebări", DuoGreen, onClick = onNext)
             } else {
-                NavButton(Icons.AutoMirrored.Filled.ArrowForward, "Pagina următoare", true, DuoGreen, onNext)
+                RoundAction(Icons.AutoMirrored.Filled.ArrowForward, "Pagina următoare", DuoGreen, onClick = onNext)
             }
         }
     }
@@ -646,46 +1000,83 @@ private fun TogglePill(
         color = if (selected) Color.White else color,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 15.sp,
+        maxLines = 1,
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(if (selected) color else color.copy(alpha = 0.14f))
             .clickable(onClickLabel = description, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 7.dp)
+            .padding(horizontal = 12.dp, vertical = 7.dp)
     )
 }
 
+/** A soft capsule that groups related round buttons. */
 @Composable
-private fun NavButton(
+private fun ControlGroup(color: Color, content: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.08f))
+            .padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        content()
+    }
+}
+
+/** A round, icon-only button in its own colour; [dimmed] looks faded but still answers taps. */
+@Composable
+private fun RoundAction(
     icon: ImageVector,
     description: String,
-    enabled: Boolean,
     color: Color,
+    dimmed: Boolean = false,
+    pulse: Boolean = false,
+    badge: String? = null,
     onClick: () -> Unit
 ) {
-    IconButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(if (enabled) color else OnBackgroundLight.copy(alpha = 0.15f))
-    ) {
-        Icon(icon, contentDescription = description, tint = Color.White)
+    val scale = if (pulse) pulseScale() else 1f
+    Box(modifier = Modifier.size(42.dp)) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .scale(scale)
+                .clip(CircleShape)
+                .background(if (dimmed) color.copy(alpha = 0.3f) else color)
+                .clickable(onClickLabel = description, role = Role.Button, onClick = onClick)
+                .semantics { contentDescription = description },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+        }
+        if (badge != null) {
+            Text(
+                text = badge,
+                color = Color.White,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 6.dp, y = (-5).dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(DuoOrange)
+                    .padding(horizontal = 4.dp)
+            )
+        }
     }
 }
 
 @Composable
-private fun ActionButton(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        shape = RoundedCornerShape(20.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
-    ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(label, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 1)
-    }
+private fun pulseScale(): Float {
+    val transition = rememberInfiniteTransition(label = "mic_pulse")
+    val scale by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.14f,
+        animationSpec = infiniteRepeatable(tween(550), RepeatMode.Reverse),
+        label = "mic_pulse_scale"
+    )
+    return scale
 }
 
 /** Comprehension check: reports how many questions were answered right on the first try. */

@@ -52,7 +52,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
@@ -61,7 +65,10 @@ import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.DrawingPath
 import com.danvaly.alfabet.ui.components.LetterCard
 import com.danvaly.alfabet.ui.components.StarRating
+import com.danvaly.alfabet.ui.components.TraceGuide
 import com.danvaly.alfabet.ui.components.TracingCanvas
+import com.danvaly.alfabet.ui.components.scoreTrace
+import com.danvaly.alfabet.ui.LocalReadingStore
 import com.danvaly.alfabet.ui.components.calculateTraceScore
 import com.danvaly.alfabet.ui.theme.*
 import kotlinx.coroutines.launch
@@ -73,15 +80,26 @@ fun TraceScreen(
     soundManager: SoundManager,
     repository: ProgressRepository
 ) {
-    val letter = remember { RomanianAlphabet.getLetterByUppercase(letterChar) }
+    val store = LocalReadingStore.current
+    // "Următoarea" moves on inside this screen, so the current letter is local state.
+    var currentLetter by remember { mutableStateOf(letterChar) }
+    val letter = remember(currentLetter) { RomanianAlphabet.getLetterByUppercase(currentLetter) }
     val scope = rememberCoroutineScope()
     val paths = remember { mutableStateListOf<DrawingPath>() }
     var currentPath by remember { mutableStateOf<DrawingPath?>(null) }
     var isUppercase by remember { mutableStateOf(true) }
+    var cursive by remember { mutableStateOf(store.traceHandwriting) }
+    var guide by remember { mutableStateOf<TraceGuide?>(null) }
     var showResult by remember { mutableStateOf(false) }
     var stars by remember { mutableIntStateOf(0) }
 
-    val displayLetter = if (isUppercase) letterChar else (letter?.lowercase ?: letterChar.lowercase())
+    val displayLetter = if (isUppercase) currentLetter else (letter?.lowercase ?: currentLetter.lowercase())
+
+    fun clearDrawing() {
+        paths.clear()
+        currentPath = null
+        showResult = false
+    }
 
     val infiniteTransition = rememberInfiniteTransition(label = "trace_anim")
     val floatOffset by infiniteTransition.animateFloat(
@@ -94,8 +112,8 @@ fun TraceScreen(
         label = "float"
     )
 
-    LaunchedEffect(letterChar) {
-        soundManager.speakSentence("Scrie litera $letterChar cu degetul")
+    LaunchedEffect(currentLetter) {
+        soundManager.speakSentence("Scrie litera $currentLetter cu degetul")
     }
 
     Box(
@@ -171,9 +189,7 @@ fun TraceScreen(
                     Button(
                         onClick = {
                             isUppercase = !isUppercase
-                            paths.clear()
-                            currentPath = null
-                            showResult = false
+                            clearDrawing()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = DuoPurple),
                         shape = RoundedCornerShape(16.dp),
@@ -186,11 +202,7 @@ fun TraceScreen(
                     }
 
                     Button(
-                        onClick = {
-                            paths.clear()
-                            currentPath = null
-                            showResult = false
-                        },
+                        onClick = { clearDrawing() },
                         colors = ButtonDefaults.buttonColors(containerColor = DuoRed),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -202,11 +214,17 @@ fun TraceScreen(
 
                     Button(
                         onClick = {
-                            stars = calculateTraceScore(paths)
+                            val shape = guide
+                            stars = if (shape != null) {
+                                scoreTrace(shape, paths.map { it.points })
+                            } else {
+                                calculateTraceScore(paths)
+                            }
                             showResult = true
                             soundManager.speakEncouragement(stars >= 2)
+                            val traced = currentLetter
                             scope.launch {
-                                repository.updateTraceStars(letterChar, stars)
+                                repository.updateTraceStars(traced, stars)
                                 repository.onGamePlayed(stars)
                             }
                         },
@@ -222,12 +240,11 @@ fun TraceScreen(
                     Button(
                         onClick = {
                             val letters = RomanianAlphabet.letters
-                            val currentIndex = letters.indexOfFirst { it.uppercase == letterChar }
+                            val currentIndex = letters.indexOfFirst { it.uppercase == currentLetter }
                             val nextIndex = (currentIndex + 1) % letters.size
-                            paths.clear()
-                            currentPath = null
-                            showResult = false
-                            soundManager.speakLetter(letters[nextIndex].uppercase)
+                            clearDrawing()
+                            // Changing the letter also announces it ("Scrie litera ...").
+                            currentLetter = letters[nextIndex].uppercase
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = DuoOrange),
                         shape = RoundedCornerShape(16.dp),
@@ -261,7 +278,8 @@ fun TraceScreen(
                             val newPath = DrawingPath(
                                 path = Path().apply { moveTo(offset.x, offset.y) },
                                 color = DuoBlue,
-                                strokeWidth = 14f
+                                strokeWidth = 14f,
+                                points = listOf(offset)
                             )
                             currentPath = newPath
                         },
@@ -271,16 +289,32 @@ fun TraceScreen(
                                     addPath(current.path)
                                     lineTo(offset.x, offset.y)
                                 }
-                                currentPath = current.copy(path = updatedPath)
+                                currentPath = current.copy(path = updatedPath, points = current.points + offset)
                             }
                         },
                         onDragEnd = {
                             currentPath?.let { paths.add(it) }
                             currentPath = null
                         },
+                        handwriting = cursive,
+                        onGuideReady = { guide = it },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+
+                // Print or school cursive letters
+                ScriptSwitch(
+                    cursive = cursive,
+                    onChange = {
+                        cursive = it
+                        store.traceHandwriting = it
+                        guide = null
+                        clearDrawing()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(10.dp)
+                )
 
                 // Result overlay
                 if (showResult) {
@@ -325,6 +359,8 @@ fun TraceSelectorScreen(
     onBack: () -> Unit,
     soundManager: SoundManager? = null
 ) {
+    val store = LocalReadingStore.current
+    var cursive by remember { mutableStateOf(store.traceHandwriting) }
     val infiniteTransition = rememberInfiniteTransition(label = "trace_sel_anim")
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = -4f,
@@ -384,7 +420,19 @@ fun TraceSelectorScreen(
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoBlue,
                     fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(start = 8.dp)
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                ScriptSwitch(
+                    cursive = cursive,
+                    onChange = {
+                        cursive = it
+                        store.traceHandwriting = it
+                    }
                 )
             }
 
@@ -410,4 +458,40 @@ fun TraceSelectorScreen(
             }
         }
     }
+}
+
+/** "Tipar / De mână": trace print letters or school cursive letters. */
+@Composable
+private fun ScriptSwitch(
+    cursive: Boolean,
+    onChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(DuoBlue.copy(alpha = 0.12f))
+            .padding(3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ScriptOption("Tipar", selected = !cursive, fontFamily = null) { onChange(false) }
+        ScriptOption("De mână", selected = cursive, fontFamily = HandwritingFont) { onChange(true) }
+    }
+}
+
+@Composable
+private fun ScriptOption(label: String, selected: Boolean, fontFamily: FontFamily?, onClick: () -> Unit) {
+    Text(
+        text = label,
+        color = if (selected) Color.White else DuoBlue,
+        fontWeight = FontWeight.Bold,
+        fontFamily = fontFamily,
+        fontSize = if (fontFamily != null) 13.sp else 15.sp,
+        maxLines = 1,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) DuoBlue else Color.Transparent)
+            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 5.dp)
+    )
 }

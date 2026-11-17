@@ -47,7 +47,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,6 +67,8 @@ import com.danvaly.alfabet.ui.theme.ConsonantColor
 import com.danvaly.alfabet.ui.theme.DiacriticColor
 import com.danvaly.alfabet.ui.theme.DuoGreen
 import com.danvaly.alfabet.ui.theme.DuoYellow
+import com.danvaly.alfabet.ui.theme.HandwritingFont
+import com.danvaly.alfabet.ui.theme.HandwritingScale
 import com.danvaly.alfabet.ui.theme.OnBackground
 import com.danvaly.alfabet.ui.theme.OnBackgroundLight
 import com.danvaly.alfabet.ui.theme.SurfaceWhite
@@ -195,7 +201,8 @@ fun WordAnalysisDialog(
     word: ReadingWord,
     uppercase: Boolean,
     soundManager: SoundManager,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    handwriting: Boolean = false
 ) {
     val scope = rememberCoroutineScope()
     var spot by remember { mutableStateOf<Spot?>(null) }
@@ -315,12 +322,23 @@ fun WordAnalysisDialog(
                             }
                             .padding(horizontal = 18.dp, vertical = 4.dp)
                     ) {
-                        Text(
-                            text = word.text.cased(uppercase),
-                            fontSize = 34.sp,
-                            fontWeight = FontWeight.Black,
-                            color = OnBackground
-                        )
+                        if (handwriting) {
+                            // The whole word in school cursive, as the child writes it.
+                            Text(
+                                text = word.text.cased(uppercase),
+                                fontSize = (34 * HandwritingScale).sp,
+                                fontFamily = HandwritingFont,
+                                fontWeight = FontWeight.Bold,
+                                color = OnBackground
+                            )
+                        } else {
+                            Text(
+                                text = word.text.cased(uppercase),
+                                fontSize = 34.sp,
+                                fontWeight = FontWeight.Black,
+                                color = OnBackground
+                            )
+                        }
                     }
                 }
 
@@ -363,6 +381,24 @@ fun WordAnalysisDialog(
         }
     }
 }
+
+/**
+ * A word as one string with each syllable in its own colour, so cursive letters stay
+ * joined (separate Text pieces would break the handwriting). [highlight] gets a yellow background.
+ */
+fun cursiveSyllables(syllables: List<String>, uppercase: Boolean, highlight: Int? = null): AnnotatedString =
+    buildAnnotatedString {
+        syllables.forEachIndexed { index, syllable ->
+            withStyle(
+                SpanStyle(
+                    color = syllableInk(index),
+                    background = if (highlight == index) DuoYellow.copy(alpha = 0.55f) else Color.Unspecified
+                )
+            ) {
+                append(syllable.cased(uppercase))
+            }
+        }
+    }
 
 private fun count(n: Int, one: String, many: String): String =
     if (n == 1) "o $one" else "$n $many"
