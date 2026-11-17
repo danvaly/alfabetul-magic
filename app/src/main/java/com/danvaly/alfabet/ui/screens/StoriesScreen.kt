@@ -108,6 +108,7 @@ import com.danvaly.alfabet.data.ReadingText
 import com.danvaly.alfabet.data.ReadingWord
 import com.danvaly.alfabet.data.Scene
 import com.danvaly.alfabet.data.Story
+import com.danvaly.alfabet.data.StoryCategory
 import com.danvaly.alfabet.data.StoryChoice
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.LocalReadingStore
@@ -157,6 +158,11 @@ fun StoriesScreen(
     onBack: () -> Unit
 ) {
     val store = LocalReadingStore.current
+    // null = all stories
+    var filter by remember { mutableStateOf<StoryCategory?>(null) }
+    val shown = remember(filter) {
+        ReadingContent.stories.filter { filter == null || it.category == filter }
+    }
 
     Box(
         modifier = Modifier
@@ -185,7 +191,25 @@ fun StoriesScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                LibraryChip("📚", "Toate", filter == null, StoryInk) { filter = null }
+                LibraryChip("🏰", "Povești clasice", filter == StoryCategory.CLASSIC, ClassicColor) {
+                    filter = StoryCategory.CLASSIC
+                }
+                LibraryChip("🏡", "Povești de zi cu zi", filter == StoryCategory.EVERYDAY, DuoGreen) {
+                    filter = StoryCategory.EVERYDAY
+                }
+                LibraryChip("🎄", "Sărbători", filter == StoryCategory.HOLIDAY, HolidayColor) {
+                    filter = StoryCategory.HOLIDAY
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 168.dp),
@@ -193,11 +217,36 @@ fun StoriesScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(ReadingContent.stories, key = { it.id }) { story ->
+                items(shown, key = { it.id }) { story ->
                     StoryCard(story, store.storyStars(story.id)) { onStoryClick(story.id) }
                 }
             }
         }
+    }
+}
+
+private val ClassicColor = Color(0xFF8E5CC4)
+private val HolidayColor = Color(0xFFE5484D)
+
+@Composable
+private fun LibraryChip(emoji: String, label: String, selected: Boolean, color: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) color else color.copy(alpha = 0.12f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = emoji, fontSize = 16.sp)
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = label,
+            color = if (selected) Color.White else color,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            maxLines = 1
+        )
     }
 }
 
@@ -212,41 +261,62 @@ private fun StoryCard(story: Story, stars: Int, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = story.cover, fontSize = 48.sp)
-            Text(
-                text = story.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold,
-                color = OnBackground,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                minLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = story.cover, fontSize = 48.sp)
                 Text(
-                    text = "Nivel ${story.level}",
+                    text = story.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = OnBackground,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    minLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Nivel ${story.level}",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(levelColor)
+                            .padding(horizontal = 10.dp, vertical = 3.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (stars > 0) "⭐".repeat(stars) else "Nouă",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DuoOrange
+                    )
+                }
+            }
+            val tag = when (story.category) {
+                StoryCategory.CLASSIC -> "clasică" to ClassicColor
+                StoryCategory.HOLIDAY -> "sărbătoare" to HolidayColor
+                StoryCategory.EVERYDAY -> null
+            }
+            if (tag != null) {
+                Text(
+                    text = tag.first,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
+                    fontSize = 11.sp,
                     modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(levelColor)
-                        .padding(horizontal = 10.dp, vertical = 3.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (stars > 0) "⭐".repeat(stars) else "Nouă",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = DuoOrange
+                        .background(tag.second)
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
                 )
             }
         }

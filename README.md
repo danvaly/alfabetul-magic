@@ -44,7 +44,7 @@ All reading activities live together in one menu, **Citesc**.
 | Mode | Description |
 |------|-------------|
 | **Citesc Pas cu Pas** | Guided reading trainer: sound out the letters, join them into syllables, read the whole word, then pick the matching picture. 4 levels (simple syllables, new words, long words, letter groups ce/ci/ge/gi/che/chi/ghe/ghi) |
-| **Povești de Citit** | 16 illustrated, animated short stories in 3 levels, one short sentence per page. Syllable view (ma-ma) or whole words, upper/lower case, print or cursive letters, slow voice, "listen" and "read together" with highlighting, and comprehension questions at the end |
+| **Povești de Citit** | 36 illustrated, animated short stories in 3 levels, one short sentence per page: 16 everyday stories, 12 classic tales retold for beginners (Capra cu trei iezi, Punguța cu doi bani, Scufița Roșie…) and 8 stories about Romanian holidays and traditions, with filters for each group. Syllable view (ma-ma) or whole words, upper/lower case, print or cursive letters, slow voice, "listen" and "read together" with highlighting, and comprehension questions at the end |
 | **Citesc eu / Mă înregistrez / Ascultă-mă** | In a story the child can read a page aloud: "Citesc eu" listens and colours the words it recognised (forgiving missing diacritics); "Mă înregistrez" records the child's voice and "Ascultă-mă" plays it back |
 | **Analiza cuvântului** | Tap any word in a story to take it apart: letters (vowels / consonants / letter groups), syllables, whole word, with a step-by-step playback |
 | **Scrie cuvântul** | See a picture, hear the word and build it from letter tiles, syllable by syllable |

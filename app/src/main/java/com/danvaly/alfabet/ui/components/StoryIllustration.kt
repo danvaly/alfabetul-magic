@@ -235,6 +235,127 @@ private fun DrawScope.drawBackdrop(backdrop: Backdrop, phase: Float) {
             waves(0.52f, -phase, Color(0x88FFFFFF))
             waves(0.62f, phase, Color(0xFFFFFFFF))
         }
+        Backdrop.WINTER -> {
+            sky(Color(0xFFB4C9E2), Color(0xFFEAF2FA))
+            cloud(0.24f, 0.14f, 1f, phase, Color(0xFFF4F7FB))
+            cloud(0.7f, 0.1f, 0.8f, -phase, Color(0xFFF4F7FB))
+            hill(0.18f, 0.6f, 0.9f, Color(0xFFE6EEF7))
+            hill(0.82f, 0.64f, 0.9f, Color(0xFFF2F6FB))
+            listOf(0.06f to 0.8f, 0.24f to 0.6f, 0.78f to 0.7f, 0.95f to 0.9f).forEach { (x, scale) ->
+                snowyTree(x, 0.8f, scale)
+            }
+            ground(0.8f, Color(0xFFF7FAFF))
+            // a frozen lake
+            drawOval(
+                Color(0xFFBFE1F3),
+                topLeft = Offset(size.width * 0.34f, size.height * 0.84f),
+                size = Size(size.width * 0.6f, size.height * 0.12f)
+            )
+            drawLine(
+                Color(0xCCFFFFFF),
+                Offset(size.width * 0.46f, size.height * 0.88f),
+                Offset(size.width * 0.6f, size.height * 0.88f),
+                size.height * 0.008f,
+                cap = StrokeCap.Round
+            )
+            snow(phase)
+        }
+        Backdrop.POND -> {
+            sky(Color(0xFF8FD8FF), Color(0xFFE6F7FF))
+            sun(0.86f, 0.16f, phase)
+            cloud(0.3f, 0.14f, 0.9f, phase)
+            hill(0.25f, 0.42f, 1.1f, Color(0xFF9BD67A))
+            hill(0.85f, 0.46f, 0.8f, Color(0xFF8FD46A))
+            ground(0.5f, Color(0xFF7CC75A))
+            pond(phase)
+            reeds(0.05f, phase)
+            reeds(0.95f, phase)
+            flowers(29)
+        }
+        Backdrop.COTTAGE -> {
+            sky(Color(0xFF8AD4FF), Color(0xFFE3F6FF))
+            sun(0.12f, 0.16f, phase)
+            cloud(0.42f, 0.12f, 0.8f, phase)
+            listOf(0.04f to 0.9f, 0.2f to 0.7f, 0.36f to 0.85f, 0.5f to 0.65f).forEach { (x, scale) ->
+                tree(x, 0.8f, scale * 0.8f, Color(0xFF3F9B57))
+            }
+            ground(0.78f, Color(0xFF7AC74F))
+            path(0.75f)
+            house(HouseKind.WOOD, phase)
+            flowers(17)
+        }
+        Backdrop.STRAW_HOUSE -> {
+            sky(Color(0xFF7FD0FF), Color(0xFFD9F3FF))
+            sun(0.12f, 0.18f, phase)
+            cloud(0.4f, 0.14f, 0.9f, -phase)
+            hill(0.25f, 0.62f, 1f, Color(0xFF8FD46A))
+            ground(0.78f, Color(0xFF6BBF45))
+            path(0.75f)
+            house(HouseKind.STRAW, phase)
+            flowers(31)
+        }
+        Backdrop.BRICK_HOUSE -> {
+            sky(Color(0xFF8AD4FF), Color(0xFFE8F8FF))
+            sun(0.12f, 0.16f, phase)
+            cloud(0.38f, 0.12f, 0.8f, phase)
+            hill(0.2f, 0.64f, 0.9f, Color(0xFF9BD67A))
+            ground(0.78f, Color(0xFF7AC74F))
+            path(0.75f)
+            house(HouseKind.BRICK, phase)
+            flowers(37)
+        }
+        Backdrop.SNOW_NIGHT -> {
+            sky(Color(0xFF1A2858), Color(0xFF4A5C9C))
+            stars(phase)
+            val moon = Offset(size.width * 0.86f, size.height * 0.16f)
+            drawCircle(Color(0x33FFF4C2), size.height * 0.13f, moon)
+            drawCircle(Color(0xFFFFF4C2), size.height * 0.09f, moon)
+            hill(0.2f, 0.64f, 1f, Color(0xFFC9D6EE))
+            hill(0.85f, 0.68f, 0.9f, Color(0xFFDDE6F5))
+            listOf(0.12f to 0.9f, 0.36f to 0.75f, 0.64f to 1f, 0.88f to 0.8f).forEach { (x, scale) ->
+                village(x, 0.8f, scale, phase)
+            }
+            ground(0.8f, Color(0xFFEFF4FC))
+            snow(phase)
+        }
+        Backdrop.PARADE -> {
+            sky(Color(0xFF8AD4FF), Color(0xFFE8F8FF))
+            cloud(0.5f, 0.12f, 0.8f, phase)
+            // buildings along the street
+            val houses = listOf(
+                Triple(0.0f, 0.24f, Color(0xFFF6D7A7)), Triple(0.22f, 0.2f, Color(0xFFE8B4A0)),
+                Triple(0.4f, 0.26f, Color(0xFFF3E3C3)), Triple(0.64f, 0.2f, Color(0xFFD9C2E8)),
+                Triple(0.82f, 0.18f, Color(0xFFF6D7A7))
+            )
+            houses.forEachIndexed { i, (x, w, color) ->
+                val top = size.height * (0.26f + (i % 2) * 0.06f)
+                drawRect(color, Offset(size.width * x, top), Size(size.width * w, size.height * 0.66f - top))
+                var wy = top + size.height * 0.05f
+                while (wy < size.height * 0.56f) {
+                    var wx = size.width * x + size.width * 0.03f
+                    while (wx < size.width * (x + w) - size.width * 0.05f) {
+                        drawRect(
+                            Color(0xFF8FC9EE),
+                            Offset(wx, wy),
+                            Size(size.width * 0.03f, size.height * 0.06f)
+                        )
+                        wx += size.width * 0.06f
+                    }
+                    wy += size.height * 0.11f
+                }
+            }
+            // bunting across the top
+            bunting(0.08f, phase)
+            // the street
+            ground(0.66f, Color(0xFFBDB5AA))
+            drawLine(
+                Color(0xFFE6E0D6),
+                Offset(0f, size.height * 0.66f),
+                Offset(size.width, size.height * 0.66f),
+                size.height * 0.02f
+            )
+            listOf(0.06f, 0.4f, 0.74f).forEachIndexed { i, x -> tricolour(x, 0.62f, phase, i) }
+        }
         Backdrop.ROOM -> {
             drawRect(Color(0xFFFFE9C7))
             // wallpaper stripes
@@ -452,4 +573,309 @@ private fun DrawScope.waves(y: Float, phase: Float, color: Color) {
         if (i == 0) path.moveTo(x, waveY) else path.lineTo(x, waveY)
     }
     drawPath(path, color, style = Stroke(width = size.height * 0.012f, cap = StrokeCap.Round))
+}
+
+private enum class HouseKind { WOOD, STRAW, BRICK }
+
+/** A light dirt path from a door (at [x]) down to the bottom edge. */
+private fun DrawScope.path(x: Float) {
+    val cx = size.width * x
+    val top = size.height * 0.8f
+    val p = Path().apply {
+        moveTo(cx - size.width * 0.04f, top)
+        lineTo(cx + size.width * 0.04f, top)
+        lineTo(cx + size.width * 0.1f, size.height)
+        lineTo(cx - size.width * 0.1f, size.height)
+        close()
+    }
+    drawPath(p, Color(0xFFE2C48E))
+}
+
+/**
+ * A little house standing on the right side of the picture (x 0.58..0.92, wall from y 0.42 to 0.8).
+ * Its door is centred at x = 0.75 and its chimney (wood and brick only) at x ≈ 0.83, top y = 0.16,
+ * so actors can be placed at the door or on the chimney.
+ */
+private fun DrawScope.house(kind: HouseKind, phase: Float) {
+    val l = size.width * 0.58f
+    val r = size.width * 0.92f
+    val t = size.height * 0.42f
+    val b = size.height * 0.8f
+    val w = r - l
+    val h = b - t
+    val wall = when (kind) {
+        HouseKind.WOOD -> Color(0xFFB7794A)
+        HouseKind.STRAW -> Color(0xFFF2CF6B)
+        HouseKind.BRICK -> Color(0xFFC4553F)
+    }
+    val roof = when (kind) {
+        HouseKind.WOOD -> Color(0xFFC0504D)
+        HouseKind.STRAW -> Color(0xFFE0A93B)
+        HouseKind.BRICK -> Color(0xFF5D6170)
+    }
+    val thin = size.height * 0.007f
+
+    // chimney with a puff of smoke (drawn first, so the roof covers its foot)
+    if (kind != HouseKind.STRAW) {
+        val cx = l + w * 0.74f
+        val chimneyTop = size.height * 0.16f
+        drawRect(
+            if (kind == HouseKind.BRICK) Color(0xFF9E3B2C) else Color(0xFF8A8A8A),
+            topLeft = Offset(cx - w * 0.06f, chimneyTop),
+            size = Size(w * 0.12f, t - chimneyTop)
+        )
+        for (i in 0 until 3) {
+            val k = (phase + i / 3f) % 1f
+            drawCircle(
+                Color.White.copy(alpha = sin(k * PI.toFloat()) * 0.7f),
+                radius = size.height * (0.018f + 0.03f * k),
+                center = Offset(cx + sin(k * TAU) * w * 0.05f, chimneyTop - k * size.height * 0.15f)
+            )
+        }
+    }
+
+    // walls and their texture
+    drawRect(wall, Offset(l, t), Size(w, h))
+    when (kind) {
+        HouseKind.WOOD -> for (i in 1 until 6) {
+            val y = t + h * i / 6f
+            drawLine(Color(0xFF8F5A33), Offset(l, y), Offset(r, y), thin)
+        }
+        HouseKind.STRAW -> for (i in 0 until 26) {
+            val x = l + w * (i + 0.5f) / 26f
+            drawLine(Color(0xFFD9AE45), Offset(x, t), Offset(x, b), thin * 0.8f)
+        }
+        HouseKind.BRICK -> {
+            val rows = 8
+            val rowH = h / rows
+            val brick = w / 5f
+            for (row in 0 until rows) {
+                val y = t + row * rowH
+                drawLine(Color(0xFFEBD5C4), Offset(l, y), Offset(r, y), thin * 0.8f)
+                var x = l + if (row % 2 == 0) brick else brick / 2
+                while (x < r) {
+                    drawLine(Color(0xFFEBD5C4), Offset(x, y), Offset(x, y + rowH), thin * 0.8f)
+                    x += brick
+                }
+            }
+        }
+    }
+
+    // roof
+    val roofPath = Path().apply {
+        moveTo(l - w * 0.1f, t)
+        lineTo(r + w * 0.1f, t)
+        lineTo((l + r) / 2, size.height * 0.14f)
+        close()
+    }
+    drawPath(roofPath, roof)
+    if (kind == HouseKind.STRAW) {
+        for (i in 1 until 9) {
+            val f = i / 9f
+            val y = size.height * 0.14f + (t - size.height * 0.14f) * f
+            val half = (w * 0.6f) * f
+            drawLine(Color(0xFFB9862A), Offset((l + r) / 2 - half, y), Offset((l + r) / 2 + half, y), thin)
+        }
+    }
+    drawPath(roofPath, Color(0x33000000), style = Stroke(width = thin))
+
+    // windows
+    for (wx in listOf(0.1f, 0.68f)) {
+        val topLeft = Offset(l + w * wx, t + h * 0.18f)
+        val box = Size(w * 0.22f, h * 0.3f)
+        drawRect(Color(0xFFFFF4D6), topLeft, box)
+        drawRect(
+            Color(0xFF9ADBFF),
+            topLeft + Offset(thin, thin),
+            Size(box.width - 2 * thin, box.height - 2 * thin)
+        )
+        drawLine(
+            Color(0xFFFFF4D6),
+            topLeft + Offset(box.width / 2, 0f),
+            topLeft + Offset(box.width / 2, box.height),
+            thin
+        )
+        drawLine(
+            Color(0xFFFFF4D6),
+            topLeft + Offset(0f, box.height / 2),
+            topLeft + Offset(box.width, box.height / 2),
+            thin
+        )
+    }
+
+    // door
+    val doorW = w * 0.22f
+    val doorH = h * 0.58f
+    val doorLeft = Offset((l + r) / 2 - doorW / 2, b - doorH)
+    drawRoundRect(
+        when (kind) {
+            HouseKind.WOOD -> Color(0xFF7A4A2A)
+            HouseKind.STRAW -> Color(0xFFA87B3A)
+            HouseKind.BRICK -> Color(0xFF6B3F22)
+        },
+        topLeft = doorLeft,
+        size = Size(doorW, doorH),
+        cornerRadius = CornerRadius(doorW * 0.3f)
+    )
+    drawCircle(Color(0xFFFFD54F), doorW * 0.08f, doorLeft + Offset(doorW * 0.75f, doorH * 0.55f))
+}
+
+private fun DrawScope.snowyTree(x: Float, baseY: Float, scale: Float) {
+    tree(x, baseY, scale, Color(0xFF2E6B4A))
+    val base = Offset(size.width * x, size.height * baseY)
+    val h = size.height * 0.62f * scale
+    val w = h * 0.5f
+    for (layer in 0 until 3) {
+        val bottom = base.y - h * (0.22f + layer * 0.22f)
+        val half = w * (0.5f - layer * 0.1f)
+        val apex = Offset(base.x, bottom - h * 0.36f)
+        // a white cap on the upper part of each layer
+        val cap = Path().apply {
+            moveTo(apex.x, apex.y)
+            lineTo(base.x + half * 0.55f, apex.y + h * 0.36f * 0.55f)
+            lineTo(base.x, apex.y + h * 0.36f * 0.42f)
+            lineTo(base.x - half * 0.55f, apex.y + h * 0.36f * 0.55f)
+            close()
+        }
+        drawPath(cap, Color.White)
+    }
+}
+
+private fun DrawScope.snow(phase: Float) {
+    val random = Random(11)
+    repeat(52) {
+        val baseX = random.nextFloat()
+        val start = random.nextFloat()
+        val speed = 1 + random.nextInt(2)
+        val wobble = sin(phase * TAU * 2 + it) * 0.015f
+        val y = size.height * ((start + phase * speed) % 1f)
+        drawCircle(
+            Color.White.copy(alpha = 0.9f),
+            size.height * (0.006f + random.nextFloat() * 0.008f),
+            Offset(size.width * (baseX + wobble), y)
+        )
+    }
+}
+
+private fun DrawScope.pond(phase: Float) {
+    val topLeft = Offset(size.width * 0.04f, size.height * 0.5f)
+    val pondSize = Size(size.width * 0.92f, size.height * 0.44f)
+    drawOval(Color(0xFF5FA84A), topLeft - Offset(0f, size.height * 0.01f), pondSize)
+    drawOval(
+        Brush.verticalGradient(
+            listOf(Color(0xFF4FB3E8), Color(0xFF2F8FC8)),
+            startY = topLeft.y,
+            endY = topLeft.y + pondSize.height
+        ),
+        topLeft = topLeft + Offset(size.width * 0.01f, size.height * 0.01f),
+        size = Size(pondSize.width - size.width * 0.02f, pondSize.height - size.height * 0.02f)
+    )
+    // ripples that grow and fade
+    listOf(0.24f to 0.66f, 0.62f to 0.8f, 0.8f to 0.64f).forEachIndexed { i, (x, y) ->
+        val k = (phase * 2 + i / 3f) % 1f
+        val rw = size.width * (0.03f + 0.07f * k)
+        val rh = size.height * (0.012f + 0.03f * k)
+        drawOval(
+            Color.White.copy(alpha = sin(k * PI.toFloat()) * 0.6f),
+            topLeft = Offset(size.width * x - rw, size.height * y - rh),
+            size = Size(rw * 2, rh * 2),
+            style = Stroke(width = size.height * 0.006f)
+        )
+    }
+    // lily pads
+    listOf(0.16f to 0.82f, 0.86f to 0.86f, 0.44f to 0.9f).forEach { (x, y) ->
+        drawOval(
+            Color(0xFF58B04A),
+            topLeft = Offset(size.width * x - size.height * 0.06f, size.height * y - size.height * 0.02f),
+            size = Size(size.height * 0.12f, size.height * 0.04f)
+        )
+    }
+}
+
+private fun DrawScope.reeds(x: Float, phase: Float) {
+    for (i in 0 until 4) {
+        val bx = size.width * x + (i - 1.5f) * size.width * 0.018f
+        val by = size.height * (0.62f + (i % 2) * 0.04f)
+        val height = size.height * (0.2f + (i % 3) * 0.04f)
+        val sway = sin(phase * TAU * 2 + i) * size.width * 0.006f
+        val tip = Offset(bx + sway, by - height)
+        drawLine(Color(0xFF3E8E3E), Offset(bx, by), tip, size.height * 0.008f, cap = StrokeCap.Round)
+        drawRoundRect(
+            Color(0xFF8D5B36),
+            topLeft = tip + Offset(-size.height * 0.012f, size.height * 0.01f),
+            size = Size(size.height * 0.024f, size.height * 0.06f),
+            cornerRadius = CornerRadius(size.height * 0.012f)
+        )
+    }
+}
+
+private val FlagBlue = Color(0xFF002B7F)
+private val FlagYellow = Color(0xFFFCD116)
+private val FlagRed = Color(0xFFCE1126)
+
+/** A Romanian flag on a pole whose foot is at ([x], [baseY]): blue, yellow, red from the pole. */
+private fun DrawScope.tricolour(x: Float, baseY: Float, phase: Float, index: Int) {
+    val pole = Offset(size.width * x, size.height * baseY)
+    val poleTop = size.height * 0.18f
+    drawLine(Color(0xFF8D6E63), pole, Offset(pole.x, poleTop), size.height * 0.012f, cap = StrokeCap.Round)
+    drawCircle(FlagYellow, size.height * 0.014f, Offset(pole.x, poleTop))
+    val flagW = minOf(size.height * 0.27f, size.width * 0.2f)
+    val flagH = flagW * 2 / 3
+    val bandW = flagW / 3
+    val steps = 6
+    listOf(FlagBlue, FlagYellow, FlagRed).forEachIndexed { band, color ->
+        // each band is a strip of thin slices that ripple like cloth
+        for (k in 0 until steps) {
+            val fx = band * bandW + k * bandW / steps
+            val wave = sin(phase * TAU * 2 + fx / flagW * 4f + index) * flagH * 0.06f * (fx / flagW)
+            drawRect(
+                color,
+                Offset(pole.x + fx, poleTop + size.height * 0.01f + wave),
+                Size(bandW / steps + 1f, flagH)
+            )
+        }
+    }
+}
+
+private fun DrawScope.bunting(y: Float, phase: Float) {
+    val colors = listOf(FlagBlue, FlagYellow, FlagRed)
+    val count = 15
+    val step = size.width / count
+    val sag = size.height * 0.04f
+    for (i in 0 until count) {
+        val cx = (i + 0.5f) * step
+        val t = cx / size.width
+        val lineY = size.height * y + sag * 4 * t * (1 - t)
+        val swing = sin(phase * TAU + i) * step * 0.06f
+        val p = Path().apply {
+            moveTo(cx - step * 0.4f, lineY)
+            lineTo(cx + step * 0.4f, lineY)
+            lineTo(cx + swing, lineY + size.height * 0.07f)
+            close()
+        }
+        drawPath(p, colors[i % 3])
+    }
+}
+
+/** A small snowy house with a warm lit window, standing on the ground at ([x], [baseY]). */
+private fun DrawScope.village(x: Float, baseY: Float, scale: Float, phase: Float) {
+    val h = size.height * 0.16f * scale
+    val w = h * 1.3f
+    val cx = size.width * x
+    val base = size.height * baseY
+    drawRect(Color(0xFF6D4C41), Offset(cx - w / 2, base - h), Size(w, h))
+    val roof = Path().apply {
+        moveTo(cx - w * 0.62f, base - h)
+        lineTo(cx + w * 0.62f, base - h)
+        lineTo(cx, base - h * 1.75f)
+        close()
+    }
+    drawPath(roof, Color(0xFFF4F7FB))
+    val glow = 0.85f + 0.15f * sin(phase * TAU * 2 + x * 10)
+    drawRect(
+        Color(0xFFFFD54F).copy(alpha = glow),
+        Offset(cx - w * 0.3f, base - h * 0.7f),
+        Size(w * 0.24f, h * 0.32f)
+    )
+    drawRect(Color(0xFF3E2723), Offset(cx + w * 0.1f, base - h * 0.6f), Size(w * 0.2f, h * 0.6f))
 }

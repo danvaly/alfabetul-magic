@@ -115,6 +115,10 @@ class ScreenshotTest {
         "06b_poveste_de_mana_cuvant_lung",
         listOf("de mână") + List(4) { "desc:Pagina următoare" }
     ) { s, r -> StoryReaderScreen("prima_zi_scoala", {}, s, r) }
+    @Test fun readerClassic() = shot("18_poveste_clasica", List(5) { "desc:Pagina următoare" }) { s, r ->
+        StoryReaderScreen("capra_trei_iezi", {}, s, r)
+    }
+    @Test fun readerHoliday() = shot("19_poveste_sarbatoare") { s, r -> StoryReaderScreen("colindul", {}, s, r) }
     @Test fun trainerLevels() = shot("07_pas_cu_pas_niveluri") { s, r -> ReadingTrainerScreen({}, s, r) }
     @Test fun trainer() = shot("08_pas_cu_pas", listOf("Cuvinte lungi")) { s, r -> ReadingTrainerScreen({}, s, r) }
     @Test fun spell() = shot("09_scrie_cuvantul", listOf("Cuvinte lungi")) { s, r -> SpellWordScreen({}, s, r) }

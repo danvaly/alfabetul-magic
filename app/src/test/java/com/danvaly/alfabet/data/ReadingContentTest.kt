@@ -73,17 +73,90 @@ class ReadingContentTest {
     }
 
     @Test
-    fun `library has sixteen stories spread over three levels`() {
+    fun `library has sixteen everyday stories spread over three levels`() {
         val stories = ReadingContent.stories
-        assertTrue("expected at least 16 stories, got ${stories.size}", stories.size >= 16)
         assertEquals(stories.size, stories.map { it.id }.toSet().size)
         assertEquals(stories.size, stories.map { it.title }.toSet().size)
         assertTrue(stories.all { it.level in 1..3 })
-        val byLevel = stories.groupingBy { it.level }.eachCount()
+        val everyday = stories.filter { it.category == StoryCategory.EVERYDAY }
+        assertTrue("expected at least 16 everyday stories, got ${everyday.size}", everyday.size >= 16)
+        val byLevel = everyday.groupingBy { it.level }.eachCount()
         assertTrue("level 1: ${byLevel[1]}", (byLevel[1] ?: 0) >= 5)
         assertTrue("level 2: ${byLevel[2]}", (byLevel[2] ?: 0) >= 5)
         assertTrue("level 3: ${byLevel[3]}", (byLevel[3] ?: 0) >= 5)
         stories.forEach { assertEquals(it, ReadingContent.getStory(it.id)) }
+    }
+
+    private fun assertBeginnerStory(story: Story, pageRange: IntRange) {
+        val id = story.id
+        assertTrue("$id: ${story.pages.size} pages, expected $pageRange", story.pages.size in pageRange)
+        assertEquals("$id: 3 questions", 3, story.questions.size)
+        story.pages.forEach { page ->
+            assertTrue("$id: '${page.markedText}' has more than 8 words", page.words.size <= 8)
+            assertTrue("$id: one sentence per page", page.markedText.count { it == '.' } <= 1)
+            assertTrue("$id: no actors on '${page.markedText}'", page.scene.actors.isNotEmpty())
+            page.words.forEach { word ->
+                word.syllables.forEach { syllable ->
+                    assertTrue(
+                        "$id: '$syllable' in '${page.markedText}' must be letters with a vowel",
+                        syllable.isNotEmpty() && syllable.all { it.isLetter() } &&
+                            syllable.any { ReadingText.isVowel(it) }
+                    )
+                }
+            }
+            page.scene.actors.forEach { actor ->
+                assertTrue("$id: actor size ${actor.size}", actor.size in 0.1f..0.45f)
+                assertTrue("$id: actor position", actor.x in 0f..1f && actor.y in 0f..1f)
+            }
+        }
+        story.questions.forEach { question ->
+            assertEquals("$id: '${question.question}' needs 3 choices", 3, question.choices.size)
+            assertEquals("$id: '${question.question}' choices must differ", 3, question.choices.map { it.label }.toSet().size)
+        }
+    }
+
+    @Test
+    fun `classic tales follow the beginner format`() {
+        val classics = ReadingContent.stories.filter { it.category == StoryCategory.CLASSIC }
+        assertTrue("expected at least 12 classics, got ${classics.size}", classics.size >= 12)
+        assertEquals(classics.size, classics.map { it.id }.toSet().size)
+        assertEquals(classics.size, classics.map { it.title }.toSet().size)
+        classics.forEach { assertBeginnerStory(it, 8..12) }
+        val byLevel = classics.groupingBy { it.level }.eachCount()
+        (1..3).forEach { level ->
+            assertTrue("classics on level $level: ${byLevel[level]}", (byLevel[level] ?: 0) >= 3)
+        }
+    }
+
+    @Test
+    fun `holiday stories follow the beginner format`() {
+        val holidays = ReadingContent.stories.filter { it.category == StoryCategory.HOLIDAY }
+        assertTrue("expected at least 8 holiday stories, got ${holidays.size}", holidays.size >= 8)
+        assertEquals(holidays.size, holidays.map { it.id }.toSet().size)
+        holidays.forEach { assertBeginnerStory(it, 6..9) }
+        assertEquals(setOf(1, 2, 3), holidays.map { it.level }.toSet())
+    }
+
+    @Test
+    fun `classic and holiday texts avoid hyphenated words and dialogue dashes`() {
+        ReadingContent.stories.filter { it.category != StoryCategory.EVERYDAY }.forEach { story ->
+            story.pages.forEach { page ->
+                // every hyphen must sit between two letters of one word (a syllable mark)
+                Regex("-").findAll(page.markedText).forEach { match ->
+                    val i = match.range.first
+                    assertTrue(
+                        "${story.id}: stray dash in '${page.markedText}'",
+                        i > 0 && i < page.markedText.lastIndex &&
+                            page.markedText[i - 1].isLetter() && page.markedText[i + 1].isLetter()
+                    )
+                }
+                // "într-o" would pass the vowel check, so look for it explicitly
+                assertTrue(
+                    "${story.id}: hyphenated word in '${page.markedText}'",
+                    !ReadingText.plain(page.words).lowercase().contains("întro")
+                )
+            }
+        }
     }
 
     @Test
