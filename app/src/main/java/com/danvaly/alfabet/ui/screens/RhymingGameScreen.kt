@@ -138,11 +138,6 @@ fun RhymingGameScreen(
             )
     ) {
         Text(
-            text = "\uD83C\uDFB5",
-            fontSize = 28.sp,
-            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
-        )
-        Text(
             text = "\uD83C\uDF3A",
             fontSize = 24.sp,
             modifier = Modifier

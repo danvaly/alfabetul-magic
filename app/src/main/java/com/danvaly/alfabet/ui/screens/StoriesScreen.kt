@@ -23,6 +23,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
@@ -837,8 +839,9 @@ private fun ReadingPane(
                     val plainInk = if (wasHeard) HeardGreen else OnBackground
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(background)
+                            // background with a shape instead of clip(): the cursive loops reach past
+                            // the tightened line box and must not be cut off.
+                            .background(background, RoundedCornerShape(12.dp))
                             .clickable { onWordClick(word) }
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -854,11 +857,22 @@ private fun ReadingPane(
                                 }
                                 withStyle(SpanStyle(color = OnBackground)) { append(word.trailing) }
                             }
+                            // A word is one unbreakable unit: the FlowRow wraps between words, never inside one.
+                            // The font's own line box is very tall, so the line height is set close to print mode.
                             Text(
                                 text = text,
                                 fontSize = cursiveSize,
                                 fontFamily = HandwritingFont,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                softWrap = false,
+                                style = LocalTextStyle.current.copy(
+                                    lineHeight = textSize * 1.3f,
+                                    lineHeightStyle = LineHeightStyle(
+                                        alignment = LineHeightStyle.Alignment.Center,
+                                        trim = LineHeightStyle.Trim.None
+                                    )
+                                )
                             )
                         } else {
                             if (showSyllables) {

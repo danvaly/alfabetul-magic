@@ -334,8 +334,8 @@ private fun TrainerTaskView(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
                     text = instruction,
@@ -344,70 +344,81 @@ private fun TrainerTaskView(
                     fontWeight = FontWeight.ExtraBold
                 )
 
-                StepLabel(1, "Litere", VowelColor)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    units.forEachIndexed { index, unit ->
-                        LetterTile(
-                            unit = unit,
-                            uppercase = false,
-                            done = index in heardLetters,
-                            height = 52.dp,
-                            onClick = {
-                                if (index !in heardLetters) heardLetters.add(index)
-                                soundManager.speakPhonetic(soundManager.soundOf(unit.text))
-                            }
-                        )
-                    }
-                }
-
-                StepLabel(2, "Silabe", SyllableInkB)
-                if (lettersDone) {
+                // Each step keeps its label and its content on one row, so all three
+                // steps fit on a short landscape screen (the column still scrolls as a fallback).
+                StepRow(1, "Litere", VowelColor) {
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        word.syllables.forEachIndexed { index, syllable ->
-                            SyllableChip(
-                                text = syllable,
-                                index = index,
-                                done = index in heardSyllables,
-                                height = 52.dp,
+                        units.forEachIndexed { index, unit ->
+                            LetterTile(
+                                unit = unit,
+                                uppercase = false,
+                                done = index in heardLetters,
+                                height = 44.dp,
                                 onClick = {
-                                    if (index !in heardSyllables) heardSyllables.add(index)
-                                    soundManager.speakSyllable(syllable)
+                                    if (index !in heardLetters) heardLetters.add(index)
+                                    soundManager.speakPhonetic(soundManager.soundOf(unit.text))
                                 }
                             )
                         }
                     }
-                } else {
-                    LockedStep("Mai întâi citește toate literele")
                 }
 
-                StepLabel(3, "Cuvânt", DuoGreen)
-                if (syllablesDone) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = word.text,
-                            fontSize = 44.sp,
-                            fontWeight = FontWeight.Black,
-                            color = OnBackground
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        TextButton(onClick = { soundManager.speakWord(word.text) }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.VolumeUp,
-                                contentDescription = null,
-                                tint = DuoOrange
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Ajutor", color = DuoOrange, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                StepRow(2, "Silabe", SyllableInkB) {
+                    if (lettersDone) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            word.syllables.forEachIndexed { index, syllable ->
+                                SyllableChip(
+                                    text = syllable,
+                                    index = index,
+                                    done = index in heardSyllables,
+                                    height = 44.dp,
+                                    onClick = {
+                                        if (index !in heardSyllables) heardSyllables.add(index)
+                                        soundManager.speakSyllable(syllable)
+                                    }
+                                )
+                            }
                         }
+                    } else {
+                        LockedStep("Mai întâi citește toate literele")
                     }
-                } else {
-                    LockedStep("Apoi citește silabele")
+                }
+
+                StepRow(3, "Cuvânt", DuoGreen) {
+                    if (syllablesDone) {
+                        FlowRow(verticalArrangement = Arrangement.Center) {
+                            Text(
+                                text = word.text,
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Black,
+                                color = OnBackground,
+                                maxLines = 1,
+                                softWrap = false,
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            TextButton(
+                                onClick = { soundManager.speakWord(word.text) },
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.VolumeUp,
+                                    contentDescription = null,
+                                    tint = DuoOrange
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Ajutor", color = DuoOrange, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                        }
+                    } else {
+                        LockedStep("Apoi citește silabele")
+                    }
                 }
             }
         }
@@ -478,15 +489,24 @@ private fun TrainerTaskView(
     }
 }
 
+/** A reading step: its numbered label on the left, its content beside it. */
+@Composable
+private fun StepRow(number: Int, title: String, color: Color, content: @Composable () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        StepLabel(number, title, color, modifier = Modifier.width(96.dp))
+        Box(modifier = Modifier.weight(1f)) { content() }
+    }
+}
+
 @Composable
 private fun LockedStep(hint: String) {
     Text(
         text = "🔒 $hint",
         color = OnBackgroundLight,
-        fontSize = 15.sp,
+        fontSize = 14.sp,
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
             .background(OnBackgroundLight.copy(alpha = 0.1f))
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     )
 }

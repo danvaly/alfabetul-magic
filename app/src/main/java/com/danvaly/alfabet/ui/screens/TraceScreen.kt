@@ -7,6 +7,11 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -126,44 +131,45 @@ fun TraceScreen(
             )
             .systemBarsPadding()
     ) {
-        // Decorations
-        Text(
-            text = "\uD83D\uDC1D",
-            fontSize = 26.sp,
-            modifier = Modifier
-                .offset(x = 10.dp, y = (20 + floatOffset).dp)
-        )
-        Text(
-            text = "\uD83C\uDF3A",
-            fontSize = 22.sp,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = 10.dp, y = (-10 + floatOffset).dp)
-        )
-
         Row(modifier = Modifier.fillMaxSize()) {
-            // Left panel: controls
-            Column(
+            // Left panel: controls. Scrolls if the screen is too short; otherwise the
+            // buttons sit at the bottom (the inner column is at least as tall as the panel).
+            BoxWithConstraints(
                 modifier = Modifier
                     .width(200.dp)
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    .fillMaxHeight()
+            ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .heightIn(min = maxHeight)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(DuoBlue.copy(alpha = 0.15f))
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Înapoi",
-                            tint = DuoBlue
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = onBack,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(DuoBlue.copy(alpha = 0.15f))
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Înapoi",
+                                tint = DuoBlue
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        // Decoration, beside (not on top of) the back button
+                        Text(
+                            text = "\uD83D\uDC1D",
+                            fontSize = 24.sp,
+                            modifier = Modifier.offset(y = floatOffset.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "\u270D\uFE0F",
@@ -180,12 +186,13 @@ fun TraceScreen(
                     }
                     Text(
                         text = "Urmărește forma literei cu degetul",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = OnBackgroundLight
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Button(
                         onClick = {
                             isUppercase = !isUppercase
@@ -255,6 +262,7 @@ fun TraceScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Următoarea")
                     }
                 }
+            }
             }
 
             // Right panel: drawing canvas

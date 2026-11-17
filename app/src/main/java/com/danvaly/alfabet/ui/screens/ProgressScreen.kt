@@ -108,33 +108,20 @@ fun ProgressScreen(
             )
             .systemBarsPadding()
     ) {
-        // Floating decorations
+        // Floating decorations: only in the empty right end of the header, away from the back button and content
         Text(
             text = "\uD83C\uDF3B",
-            fontSize = 28.sp,
+            fontSize = 26.sp,
             modifier = Modifier
-                .offset(x = 20.dp, y = (30 + floatOffset).dp)
+                .align(Alignment.TopEnd)
+                .offset(x = (-75).dp, y = (18 + floatOffset).dp)
         )
         Text(
             text = "\uD83D\uDC1E",
             fontSize = 24.sp,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .offset(x = (-25).dp, y = (35 + floatOffset2).dp)
-        )
-        Text(
-            text = "\uD83C\uDF37",
-            fontSize = 22.sp,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = 15.dp, y = (-10 + floatOffset).dp)
-        )
-        Text(
-            text = "\uD83D\uDC22",
-            fontSize = 26.sp,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset(x = (-20).dp, y = (-15 + floatOffset2).dp)
+                .offset(x = (-25).dp, y = (20 + floatOffset2).dp)
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -230,7 +217,7 @@ fun ProgressScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         StatCard(
                             emoji = "\u2B50",
-                            value = "$totalStars",
+                            value = "${totalStars ?: 0}",
                             label = "Stele",
                             color = DuoYellow,
                             modifier = Modifier.weight(1f)

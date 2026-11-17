@@ -111,11 +111,6 @@ fun SentenceBuildScreen(
             .systemBarsPadding()
     ) {
         Text(
-            text = "\uD83D\uDC26",
-            fontSize = 28.sp,
-            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
-        )
-        Text(
             text = "\uD83C\uDF3C",
             fontSize = 24.sp,
             modifier = Modifier

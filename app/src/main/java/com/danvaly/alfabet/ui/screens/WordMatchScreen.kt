@@ -134,11 +134,6 @@ fun WordMatchScreen(
             )
     ) {
         Text(
-            text = "\uD83D\uDC1D",
-            fontSize = 28.sp,
-            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
-        )
-        Text(
             text = "\uD83C\uDF3A",
             fontSize = 24.sp,
             modifier = Modifier

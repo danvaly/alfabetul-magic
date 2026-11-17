@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -90,7 +91,11 @@ class ScreenshotTest {
         }
         rule.mainClock.advanceTimeBy(1500)
         clicks.forEach { text ->
-            rule.onAllNodesWithText(text, substring = true)[0].performClick()
+            if (text.startsWith("desc:")) {
+                rule.onAllNodesWithContentDescription(text.removePrefix("desc:"))[0].performClick()
+            } else {
+                rule.onAllNodesWithText(text, substring = true)[0].performClick()
+            }
             rule.mainClock.advanceTimeBy(1500)
         }
         rule.onRoot().captureRoboImage("build/shots/$name.png")
@@ -103,6 +108,10 @@ class ScreenshotTest {
     @Test fun readerLong() = shot("05_poveste_lunga") { s, r -> StoryReaderScreen("iepurasul", {}, s, r) }
     @Test fun readerCursive() =
         shot("06_poveste_de_mana", listOf("de mână")) { s, r -> StoryReaderScreen("prima_zi_scoala", {}, s, r) }
+    @Test fun readerCursiveLongWord() = shot(
+        "06b_poveste_de_mana_cuvant_lung",
+        listOf("de mână") + List(4) { "desc:Pagina următoare" }
+    ) { s, r -> StoryReaderScreen("prima_zi_scoala", {}, s, r) }
     @Test fun trainerLevels() = shot("07_pas_cu_pas_niveluri") { s, r -> ReadingTrainerScreen({}, s, r) }
     @Test fun trainer() = shot("08_pas_cu_pas", listOf("Cuvinte lungi")) { s, r -> ReadingTrainerScreen({}, s, r) }
     @Test fun spell() = shot("09_scrie_cuvantul", listOf("Cuvinte lungi")) { s, r -> SpellWordScreen({}, s, r) }

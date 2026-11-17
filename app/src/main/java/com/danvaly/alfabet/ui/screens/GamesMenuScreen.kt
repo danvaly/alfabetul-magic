@@ -98,11 +98,6 @@ fun GamesMenuScreen(
     ) {
         // Floating decorations
         Text(
-            text = "\uD83D\uDC3E",
-            fontSize = 30.sp,
-            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
-        )
-        Text(
             text = "\uD83C\uDF3A",
             fontSize = 26.sp,
             modifier = Modifier

@@ -116,11 +116,6 @@ fun AlphabetOrderScreen(
             .systemBarsPadding()
     ) {
         Text(
-            text = "\uD83D\uDC22",
-            fontSize = 28.sp,
-            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
-        )
-        Text(
             text = "\uD83C\uDF3B",
             fontSize = 24.sp,
             modifier = Modifier

@@ -121,11 +121,6 @@ fun DailyChallengeScreen(
             .systemBarsPadding()
     ) {
         Text(
-            text = "\u2B50",
-            fontSize = 28.sp,
-            modifier = Modifier.offset(x = 20.dp, y = (30 + floatOffset).dp)
-        )
-        Text(
             text = "\uD83C\uDF1F",
             fontSize = 24.sp,
             modifier = Modifier
