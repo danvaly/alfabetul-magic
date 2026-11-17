@@ -25,12 +25,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Draw
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -71,7 +75,8 @@ fun LetterDetailScreen(
     onBack: () -> Unit,
     onTrace: () -> Unit,
     soundManager: SoundManager,
-    repository: ProgressRepository
+    repository: ProgressRepository,
+    onStory: () -> Unit = {}
 ) {
     val letter = remember { RomanianAlphabet.getLetterByUppercase(letterChar) }
     val scope = rememberCoroutineScope()
@@ -152,13 +157,15 @@ fun LetterDetailScreen(
         )
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
         ) {
             // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -169,7 +176,7 @@ fun LetterDetailScreen(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Inapoi",
+                        contentDescription = "Înapoi",
                         tint = DuoGreen
                     )
                 }
@@ -202,7 +209,10 @@ fun LetterDetailScreen(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 16.dp)
                     ) {
                         BouncingLetter(
                             letter = letter,
@@ -232,9 +242,9 @@ fun LetterDetailScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
-                                Icon(Icons.Filled.VolumeUp, contentDescription = "Asculta")
+                                Icon(Icons.Filled.VolumeUp, contentDescription = "Ascultă")
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Asculta", fontWeight = FontWeight.Bold)
+                                Text("Ascultă", fontWeight = FontWeight.Bold)
                             }
                             // Trace button
                             Button(
@@ -247,12 +257,26 @@ fun LetterDetailScreen(
                                 Text("Scrie", fontWeight = FontWeight.Bold)
                             }
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // Story button
+                        Button(
+                            onClick = onStory,
+                            colors = ButtonDefaults.buttonColors(containerColor = DuoOrange),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Icon(Icons.Filled.MenuBook, contentDescription = "Povestea literei")
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Povestea literei", fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
                 // Right: Example words
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -391,7 +415,7 @@ private fun WordCard(
             ) {
                 Icon(
                     Icons.Filled.VolumeUp,
-                    contentDescription = "Asculta $word",
+                    contentDescription = "Ascultă $word",
                     tint = DuoGreen,
                     modifier = Modifier
                         .size(36.dp)

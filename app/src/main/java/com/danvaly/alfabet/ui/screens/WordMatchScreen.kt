@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +46,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
+import com.danvaly.alfabet.data.DifficultyManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.ConfettiAnimation
@@ -82,6 +87,8 @@ fun WordMatchScreen(
     var showFeedback by remember { mutableStateOf(false) }
     var showConfetti by remember { mutableStateOf(false) }
     val totalRounds = 8
+    val stats by repository.appStats.collectAsState(initial = null)
+    val level = DifficultyManager.fromInt(stats?.difficulty ?: 1)
 
     val targetLetter = remember(currentRound) {
         RomanianAlphabet.letters.random()
@@ -89,9 +96,11 @@ fun WordMatchScreen(
     val targetWord = remember(currentRound) {
         targetLetter.words.random()
     }
-    val options = remember(currentRound) {
-        val others = RomanianAlphabet.getRandomLetters(3, targetLetter.uppercase)
+    val options = remember(currentRound, level) {
+        val others = RomanianAlphabet.getRandomLetters(level.optionCount - 1, targetLetter.uppercase)
             .map { it.words.first().word }
+            .filter { it != targetWord.word }
+            .distinct()
         (others + targetWord.word).shuffled()
     }
 
@@ -147,7 +156,8 @@ fun WordMatchScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .systemBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -161,10 +171,10 @@ fun WordMatchScreen(
                         .clip(CircleShape)
                         .background(DuoBlue.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoBlue)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoBlue)
                 }
                 Text(
-                    text = "\uD83D\uDDBC\uFE0F Cuvant si Imagine",
+                    text = "\uD83D\uDDBC\uFE0F Cuvânt și imagine",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoBlue,
                     fontWeight = FontWeight.ExtraBold
@@ -193,7 +203,7 @@ fun WordMatchScreen(
                 trackColor = DuoBlue.copy(alpha = 0.2f)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -206,16 +216,16 @@ fun WordMatchScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Ce cuvant se potriveste?",
+                        text = "Ce cuvânt se potrivește?",
                         style = MaterialTheme.typography.titleLarge,
                         color = OnBackground,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Card(
                         modifier = Modifier
-                            .size(180.dp)
+                            .size(150.dp)
                             .scale(pulseScale),
                         shape = RoundedCornerShape(32.dp),
                         colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
@@ -227,25 +237,27 @@ fun WordMatchScreen(
                         ) {
                             Text(
                                 text = targetWord.emoji,
-                                fontSize = 80.sp
+                                fontSize = 72.sp
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "\uD83D\uDC3B",
-                        fontSize = 36.sp,
+                        fontSize = 28.sp,
                         modifier = Modifier.offset(y = floatOffset.dp)
                     )
                 }
 
                 // Right: Word options
                 Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "Alege cuvantul:",
+                        text = "Alege cuvântul:",
                         style = MaterialTheme.typography.titleLarge,
                         color = OnBackground,
                         fontWeight = FontWeight.Bold

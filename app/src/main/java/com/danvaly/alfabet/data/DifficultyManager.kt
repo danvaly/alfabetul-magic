@@ -7,7 +7,7 @@ enum class DifficultyLevel(
     val optionCount: Int,
     val hintEnabled: Boolean
 ) {
-    BEGINNER("Incepator", "\uD83C\uDF31", 0.7f, 3, true),
+    BEGINNER("Începător", "\uD83C\uDF31", 0.7f, 3, true),
     INTERMEDIATE("Intermediar", "\uD83C\uDF3F", 1.0f, 4, false),
     ADVANCED("Avansat", "\uD83C\uDF33", 1.3f, 5, false)
 }

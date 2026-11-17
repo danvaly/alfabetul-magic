@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +42,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -61,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
+import com.danvaly.alfabet.data.DifficultyManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.StarRating
@@ -92,6 +96,10 @@ fun BalloonPopScreen(
     var balloonIdCounter by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val screenWidth = LocalConfiguration.current.screenWidthDp
+    val stats by repository.appStats.collectAsState(initial = null)
+    val level = DifficultyManager.fromInt(stats?.difficulty ?: 1)
+    // Read through State so the long-running spawn loop always sees the current level.
+    val speedFactor by rememberUpdatedState(level.speedMultiplier)
 
     val infiniteTransition = rememberInfiniteTransition(label = "bg_anim")
     val cloudOffset by infiniteTransition.animateFloat(
@@ -116,7 +124,8 @@ fun BalloonPopScreen(
                 color = BalloonColors.random(),
                 x = (50..(screenWidth - 100)).random().toFloat(),
                 // SLOWER speed: was 3-6, now 1.5-3 for gentler floating
-                speed = (15..30).random().toFloat() / 10f
+                // Beginner floats slower than before, advanced a bit faster.
+                speed = (15..30).random().toFloat() / 10f * speedFactor
             )
         )
     }
@@ -148,7 +157,7 @@ fun BalloonPopScreen(
         if (!gameOver) {
             while (!gameOver) {
                 spawnBalloon()
-                delay((1200L..2200L).random())
+                delay(((1200L..2200L).random() / speedFactor).toLong())
             }
         }
     }
@@ -203,7 +212,8 @@ fun BalloonPopScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .systemBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -213,7 +223,7 @@ fun BalloonPopScreen(
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.8f))
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoGreen)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoGreen)
             }
 
             Card(
@@ -227,7 +237,7 @@ fun BalloonPopScreen(
                     Text(text = "\uD83C\uDF88", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Gaseste: $targetLetter",
+                        text = "Găsește: $targetLetter",
                         color = Color.White,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 20.sp
@@ -345,7 +355,7 @@ fun BalloonPopScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = OnBackgroundLight),
                             shape = RoundedCornerShape(20.dp)
                         ) {
-                            Text("Inapoi", fontWeight = FontWeight.Bold)
+                            Text("Înapoi", fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = {
@@ -359,9 +369,9 @@ fun BalloonPopScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
                             shape = RoundedCornerShape(20.dp)
                         ) {
-                            Icon(Icons.Filled.Refresh, "Joaca din nou")
+                            Icon(Icons.Filled.Refresh, "Joacă din nou")
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Joaca din nou", fontWeight = FontWeight.Bold)
+                            Text("Joacă din nou", fontWeight = FontWeight.Bold)
                         }
                     }
                 }

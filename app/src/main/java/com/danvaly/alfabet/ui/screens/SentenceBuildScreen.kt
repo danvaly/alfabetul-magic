@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -107,6 +108,7 @@ fun SentenceBuildScreen(
                     colors = listOf(Color(0xFFE8F5E9), Color(0xFFC8E6C9), Color(0xFFE0F2F1))
                 )
             )
+            .systemBarsPadding()
     ) {
         Text(
             text = "\uD83D\uDC26",
@@ -145,10 +147,10 @@ fun SentenceBuildScreen(
                         .clip(CircleShape)
                         .background(DuoGreen.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoGreen)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoGreen)
                 }
                 Text(
-                    text = "\uD83D\uDCDD Construieste Propozitia",
+                    text = "\uD83D\uDCDD Construiește propoziția",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoGreen,
                     fontWeight = FontWeight.ExtraBold
@@ -197,7 +199,7 @@ fun SentenceBuildScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Pune cuvintele in ordine:",
+                            text = "Pune cuvintele în ordine:",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = OnBackground,
@@ -345,13 +347,13 @@ fun SentenceBuildScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
-                                Text("Verifica!", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                Text("Verifică!", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             }
                         }
 
                         if (showFeedback) {
                             Text(
-                                text = if (isCorrect) "\u2705 Corect!" else "\u274C Incorect!",
+                                text = if (isCorrect) "\u2705 Corect!" else "\u274C Greșit! Mai încearcă!",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isCorrect) DuoGreen else DuoRed

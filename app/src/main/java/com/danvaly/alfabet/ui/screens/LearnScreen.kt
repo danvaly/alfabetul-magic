@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -71,6 +72,7 @@ fun LearnScreen(
                     colors = listOf(Color(0xFFE8F5E9), BackgroundCream, BackgroundLight)
                 )
             )
+            .systemBarsPadding()
     ) {
         // Decorative floating animals
         Text(
@@ -106,7 +108,7 @@ fun LearnScreen(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Inapoi",
+                        contentDescription = "Înapoi",
                         tint = DuoGreen
                     )
                 }
@@ -117,7 +119,7 @@ fun LearnScreen(
                     modifier = Modifier.offset(y = floatOffset.dp)
                 )
                 Text(
-                    text = "Alfabetul Romanesc",
+                    text = "Alfabetul românesc",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoGreen,
                     fontWeight = FontWeight.ExtraBold,

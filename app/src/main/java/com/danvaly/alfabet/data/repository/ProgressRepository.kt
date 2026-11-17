@@ -1,6 +1,8 @@
 package com.danvaly.alfabet.data.repository
 
+import com.danvaly.alfabet.data.ProgressMerge
 import com.danvaly.alfabet.data.local.ProgressDao
+import com.danvaly.alfabet.data.nextStreak
 import com.danvaly.alfabet.data.model.AppStats
 import com.danvaly.alfabet.data.model.LetterProgress
 import kotlinx.coroutines.flow.Flow
@@ -18,57 +20,47 @@ class ProgressRepository(private val dao: ProgressDao) {
     fun getLetterProgress(letter: String): Flow<LetterProgress?> =
         dao.getLetterProgress(letter)
 
+    private suspend fun stored(letter: String): LetterProgress? =
+        dao.getLetterProgress(letter).firstOrNull()
+
     suspend fun markLetterLearned(letter: String) {
-        val existing = LetterProgress(
-            letter = letter,
-            learnCompleted = true,
-            lastPlayedTimestamp = System.currentTimeMillis()
-        )
-        dao.upsertProgress(existing)
+        dao.upsertProgress(ProgressMerge.learned(stored(letter), letter, System.currentTimeMillis()))
     }
 
     suspend fun updateTraceStars(letter: String, stars: Int) {
         dao.upsertProgress(
-            LetterProgress(
-                letter = letter,
-                learnCompleted = true,
-                traceStars = stars,
-                lastPlayedTimestamp = System.currentTimeMillis()
-            )
+            ProgressMerge.traceStars(stored(letter), letter, stars, System.currentTimeMillis())
         )
     }
 
     suspend fun updateWordMatchStars(letter: String, stars: Int) {
         dao.upsertProgress(
-            LetterProgress(
-                letter = letter,
-                learnCompleted = true,
-                wordMatchStars = stars,
-                lastPlayedTimestamp = System.currentTimeMillis()
-            )
+            ProgressMerge.wordMatchStars(stored(letter), letter, stars, System.currentTimeMillis())
         )
     }
 
     suspend fun updateDiacriticStars(letter: String, stars: Int) {
         dao.upsertProgress(
-            LetterProgress(
-                letter = letter,
-                learnCompleted = true,
-                diacriticStars = stars,
-                lastPlayedTimestamp = System.currentTimeMillis()
-            )
+            ProgressMerge.diacriticStars(stored(letter), letter, stars, System.currentTimeMillis())
         )
     }
 
+    /**
+     * Counts one more correct quiz answer for [letter]. The count is taken from the
+     * database; [currentCorrect] is kept only for signature compatibility.
+     */
+    @Suppress("UNUSED_PARAMETER")
     suspend fun incrementQuizCorrect(letter: String, currentCorrect: Int) {
-        dao.upsertProgress(
-            LetterProgress(
-                letter = letter,
-                learnCompleted = true,
-                quizCorrect = currentCorrect + 1,
-                lastPlayedTimestamp = System.currentTimeMillis()
-            )
-        )
+        dao.upsertProgress(ProgressMerge.quizCorrect(stored(letter), letter, System.currentTimeMillis()))
+    }
+
+    /** Call once per app start: records today's play date and updates the daily streak. */
+    suspend fun onAppOpened() {
+        ensureStatsExist()
+        val stats = dao.getAppStats().firstOrNull()
+        val today = LocalDate.now().toString()
+        val streak = nextStreak(stats?.lastPlayDate ?: "", today, stats?.currentStreak ?: 0)
+        dao.updateStreak(today, streak)
     }
 
     suspend fun onGamePlayed(starsEarned: Int) {

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -93,6 +94,7 @@ fun GamesMenuScreen(
                     colors = listOf(Color(0xFFF3E5F5), Color(0xFFE1BEE7), Color(0xFFF8F0FF))
                 )
             )
+            .systemBarsPadding()
     ) {
         // Floating decorations
         Text(
@@ -137,7 +139,7 @@ fun GamesMenuScreen(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Inapoi",
+                        contentDescription = "Înapoi",
                         tint = DuoPurple
                     )
                 }
@@ -166,8 +168,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83C\uDF88",
                     animal = "\uD83D\uDC3B",
-                    title = "Sparge\nBaloanele",
-                    description = "Atinge baloanele cu litera corecta",
+                    title = "Sparge\nbaloanele",
+                    description = "Atinge baloanele cu litera corectă",
                     backgroundColor = DuoRed,
                     shadowColor = Color(0xFFCC3333),
                     onClick = {
@@ -179,8 +181,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83C\uDCCF",
                     animal = "\uD83D\uDC30",
-                    title = "Potriveste\nLiterele",
-                    description = "Gaseste perechile majuscula-minuscula",
+                    title = "Potrivește\nliterele",
+                    description = "Găsește perechile: literă mare – literă mică",
                     backgroundColor = DuoPurple,
                     shadowColor = Color(0xFFA45ED6),
                     onClick = onMatchGame,
@@ -189,8 +191,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83C\uDFB5",
                     animal = "\uD83E\uDD89",
-                    title = "Ce Litera\nAuzi?",
-                    description = "Asculta si alege litera corecta",
+                    title = "Ce literă\nauzi?",
+                    description = "Ascultă și alege litera corectă",
                     backgroundColor = DuoGreen,
                     shadowColor = DuoGreenDark,
                     onClick = onQuizGame,
@@ -199,8 +201,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83D\uDDBC\uFE0F",
                     animal = "\uD83D\uDC1D",
-                    title = "Cuvant si\nImagine",
-                    description = "Potriveste cuvantul cu imaginea",
+                    title = "Cuvânt și\nimagine",
+                    description = "Potrivește cuvântul cu imaginea",
                     backgroundColor = DuoBlue,
                     shadowColor = DuoBlueDark,
                     onClick = onWordMatch,
@@ -219,7 +221,7 @@ fun GamesMenuScreen(
                     emoji = "\u270D\uFE0F",
                     animal = "\uD83E\uDD8B",
                     title = "Diacritice",
-                    description = "Invata literele speciale romanesti",
+                    description = "Învață literele speciale românești",
                     backgroundColor = Color(0xFF9C27B0),
                     shadowColor = Color(0xFF7B1FA2),
                     onClick = onDiacritics,
@@ -228,8 +230,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83D\uDCDD",
                     animal = "\uD83D\uDC26",
-                    title = "Construieste\nPropozitia",
-                    description = "Pune cuvintele in ordine",
+                    title = "Construiește\npropoziția",
+                    description = "Pune cuvintele în ordine",
                     backgroundColor = Color(0xFF00897B),
                     shadowColor = Color(0xFF00695C),
                     onClick = onSentenceBuild,
@@ -238,8 +240,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83C\uDFB5",
                     animal = "\uD83D\uDC25",
-                    title = "Jocul\nRimelor",
-                    description = "Gaseste cuvinte care rimeaza",
+                    title = "Jocul\nrimelor",
+                    description = "Găsește cuvinte care rimează",
                     backgroundColor = DuoPink,
                     shadowColor = Color(0xFFE060A0),
                     onClick = onRhymingGame,
@@ -248,8 +250,8 @@ fun GamesMenuScreen(
                 GameCard3D(
                     emoji = "\uD83D\uDD24",
                     animal = "\uD83D\uDC22",
-                    title = "Ordoneaza\nAlfabetul",
-                    description = "Pune literele in ordine alfabetica",
+                    title = "Ordonează\nalfabetul",
+                    description = "Pune literele în ordine alfabetică",
                     backgroundColor = Color(0xFF0288D1),
                     shadowColor = Color(0xFF01579B),
                     onClick = onAlphabetOrder,

@@ -14,7 +14,8 @@ import com.danvaly.alfabet.ui.screens.*
 fun AlfabetNavGraph(
     navController: NavHostController,
     soundManager: SoundManager,
-    repository: ProgressRepository
+    repository: ProgressRepository,
+    onProfileSelected: (String) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -29,6 +30,9 @@ fun AlfabetNavGraph(
                 onNavigateToProgress = { navController.navigate(Screen.Progress.route) },
                 onNavigateToDailyChallenge = { navController.navigate(Screen.DailyChallenge.route) },
                 onNavigateToParentDashboard = { navController.navigate(Screen.ParentDashboard.route) },
+                onNavigateToReading = { navController.navigate(Screen.ReadingHub.route) },
+                onNavigateToStickers = { navController.navigate(Screen.StickerAlbum.route) },
+                onProfileSelected = onProfileSelected,
                 soundManager = soundManager
             )
         }
@@ -52,6 +56,7 @@ fun AlfabetNavGraph(
                 letterChar = letter,
                 onBack = { navController.popBackStack() },
                 onTrace = { navController.navigate(Screen.Trace.createRoute(letter)) },
+                onStory = { navController.navigate(Screen.LetterStory.createRoute(letter)) },
                 soundManager = soundManager,
                 repository = repository
             )
@@ -200,10 +205,90 @@ fun AlfabetNavGraph(
             )
         }
 
+        composable(Screen.Stories.route) {
+            StoriesScreen(
+                onStoryClick = { storyId ->
+                    navController.navigate(Screen.StoryReader.createRoute(storyId))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.StoryReader.route,
+            arguments = listOf(navArgument("storyId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            StoryReaderScreen(
+                storyId = backStackEntry.arguments?.getString("storyId").orEmpty(),
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.ReadingTrainer.route) {
+            ReadingTrainerScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
         composable(Screen.ParentDashboard.route) {
             ParentDashboardScreen(
                 onBack = { navController.popBackStack() },
+                repository = repository,
+                onProfileSelected = onProfileSelected
+            )
+        }
+
+        composable(Screen.ReadingHub.route) {
+            ReadingHubScreen(
+                onBack = { navController.popBackStack() },
+                onReadingTrainer = { navController.navigate(Screen.ReadingTrainer.route) },
+                onStories = { navController.navigate(Screen.Stories.route) },
+                onSpellWord = { navController.navigate(Screen.SpellWord.route) },
+                onSyllableSplit = { navController.navigate(Screen.SyllableSplit.route) },
+                onConfusableLetters = { navController.navigate(Screen.ConfusableLetters.route) },
+                onHardWords = { navController.navigate(Screen.HardWords.route) }
+            )
+        }
+
+        composable(Screen.SpellWord.route) {
+            SpellWordScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
                 repository = repository
+            )
+        }
+
+        composable(Screen.SyllableSplit.route) {
+            SyllableSplitScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.ConfusableLetters.route) {
+            ConfusableLettersScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.HardWords.route) {
+            HardWordsScreen(
+                onBack = { navController.popBackStack() },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
+
+        composable(Screen.StickerAlbum.route) {
+            StickerAlbumScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }
