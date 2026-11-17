@@ -278,7 +278,9 @@ fun SyllableScreen(
                             fontSize = 48.sp,
                             fontWeight = FontWeight.Black,
                             color = if (currentSyllable.isNotEmpty()) Color.White else OnBackgroundLight,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            // "_" sits on the baseline; lift the empty placeholder to the card's middle
+                            modifier = Modifier.offset(y = if (currentSyllable.isEmpty()) (-12).dp else 0.dp)
                         )
                         if (currentSyllable.isNotEmpty()) {
                             IconButton(

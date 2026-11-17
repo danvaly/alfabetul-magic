@@ -23,8 +23,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
@@ -858,7 +859,7 @@ private fun ReadingPane(
                                 withStyle(SpanStyle(color = OnBackground)) { append(word.trailing) }
                             }
                             // A word is one unbreakable unit: the FlowRow wraps between words, never inside one.
-                            // The font's own line box is very tall, so the line height is set close to print mode.
+                            // The font's own line box is very tall, so the word's box is set close to print mode.
                             Text(
                                 text = text,
                                 fontSize = cursiveSize,
@@ -866,13 +867,7 @@ private fun ReadingPane(
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1,
                                 softWrap = false,
-                                style = LocalTextStyle.current.copy(
-                                    lineHeight = textSize * 1.3f,
-                                    lineHeightStyle = LineHeightStyle(
-                                        alignment = LineHeightStyle.Alignment.Center,
-                                        trim = LineHeightStyle.Trim.None
-                                    )
-                                )
+                                modifier = Modifier.cursiveWordBox(lineHeight = textSize * 1.2f)
                             )
                         } else {
                             if (showSyllables) {
@@ -1194,4 +1189,21 @@ private fun QuestionsPane(
             }
         }
     }
+}
+
+/**
+ * Lays out one cursive word:
+ * - Joined cursive letters are shaped differently than the per-colour runs are measured, so the
+ *   measured width of a multi-colour word can come out a few pixels short and the last letter
+ *   would drop to a second line (or be cut off). The word gets a little extra width.
+ * - The handwriting font's line box (tall loops above and below) is much taller than the print
+ *   font's, which spread the lines far apart. The word's box is [lineHeight] high instead, with
+ *   the text centred in it; the loops may reach past the box, which is not clipped.
+ */
+private fun Modifier.cursiveWordBox(lineHeight: TextUnit): Modifier = layout { measurable, constraints ->
+    val slack = 6.dp.roundToPx()
+    val width = measurable.maxIntrinsicWidth(Constraints.Infinity) + slack
+    val placeable = measurable.measure(Constraints(minWidth = width, maxWidth = width))
+    val height = lineHeight.roundToPx().coerceAtMost(placeable.height)
+    layout(placeable.width, height) { placeable.place(0, (height - placeable.height) / 2) }
 }

@@ -200,7 +200,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .systemBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Top bar: who is playing, title, today's goal
@@ -222,20 +222,20 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "🦉",
-                        fontSize = 36.sp,
+                        fontSize = 30.sp,
                         modifier = Modifier.offset(y = floatOffset.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "Alfabetul Magic",
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                             color = DuoGreen,
                             fontWeight = FontWeight.Black
                         )
                         Text(
                             text = "Învață alfabetul românesc prin joacă!",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = OnBackgroundLight,
                             textAlign = TextAlign.Center
                         )
@@ -250,9 +250,10 @@ fun HomeScreen(
                 VoiceMissingBanner(onInstall = { soundManager.openVoiceSettings(context) })
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Main game mode cards - top row
+            // Main game mode cards - top row (kept short so the second row's labels
+            // are visible on a 360dp-high landscape phone without scrolling)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
@@ -265,7 +266,7 @@ fun HomeScreen(
                     shadowColor = DuoGreenDark,
                     onClick = onNavigateToLearn,
                     modifier = Modifier.weight(1f),
-                    cardHeight = 140
+                    cardHeight = 120
                 )
                 GameModeCard(
                     title = "Scrie\nLiterele",
@@ -275,7 +276,7 @@ fun HomeScreen(
                     shadowColor = DuoBlueDark,
                     onClick = onNavigateToTrace,
                     modifier = Modifier.weight(1f),
-                    cardHeight = 140
+                    cardHeight = 120
                 )
                 GameModeCard(
                     title = "Formează\nSilabe",
@@ -285,7 +286,7 @@ fun HomeScreen(
                     shadowColor = Color(0xFFCC7800),
                     onClick = onNavigateToSyllable,
                     modifier = Modifier.weight(1f),
-                    cardHeight = 140
+                    cardHeight = 120
                 )
                 GameModeCard(
                     title = "Jocuri",
@@ -295,7 +296,7 @@ fun HomeScreen(
                     shadowColor = Color(0xFFA45ED6),
                     onClick = onNavigateToGames,
                     modifier = Modifier.weight(1f),
-                    cardHeight = 140
+                    cardHeight = 120
                 )
                 GameModeCard(
                     title = "Progresul\nMeu",
@@ -305,11 +306,11 @@ fun HomeScreen(
                     shadowColor = Color(0xFFCCAD00),
                     onClick = onNavigateToProgress,
                     modifier = Modifier.weight(1f),
-                    cardHeight = 140
+                    cardHeight = 120
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Bottom row: one big reading card + daily challenge + stickers + parents
             Row(
@@ -606,23 +607,28 @@ private fun GameModeCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(12.dp),
+                    .padding(horizontal = 12.dp, vertical = if (cardHeight < 130) 8.dp else 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                val short = cardHeight < 130
                 Text(
                     text = emoji,
-                    fontSize = if (cardHeight > 150) 44.sp else 32.sp,
+                    fontSize = when {
+                        cardHeight > 150 -> 44.sp
+                        short -> 26.sp
+                        else -> 32.sp
+                    },
                     modifier = Modifier.offset(y = wobble.dp)
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(if (short) 2.dp else 6.dp))
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(if (short) 20.dp else 24.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(if (short) 2.dp else 4.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,

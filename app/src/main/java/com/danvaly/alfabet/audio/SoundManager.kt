@@ -28,6 +28,16 @@ class SoundManager(context: Context) {
     val voiceState: StateFlow<VoiceState> = _voiceState.asStateFlow()
     private val romanianLocale = Locale("ro", "RO")
 
+    // A second engine for the "Engleză" section, so the Romanian voice settings stay untouched.
+    private var englishTts: TextToSpeech? = null
+    private var englishReady = false
+    private val _englishVoiceState = MutableStateFlow(VoiceState.LOADING)
+
+    /** LOADING until the engine answers, then READY or MISSING (no English voice). */
+    val englishVoiceState: StateFlow<VoiceState> = _englishVoiceState.asStateFlow()
+    private var pendingEnglish: CancellableContinuation<Boolean>? = null
+    private var englishCounter = 0
+
     // Romanian phonetic pronunciation hints for more natural speech
     private val phoneticHints = mapOf(
         "ă" to "ăă",
@@ -84,7 +94,82 @@ class SoundManager(context: Context) {
             _voiceState.value = VoiceState.MISSING
             null
         }
+
+        englishTts = try {
+            TextToSpeech(context.applicationContext) { status ->
+                englishReady = false
+                if (status == TextToSpeech.SUCCESS) {
+                    englishReady = trySetLanguage(englishTts, Locale.US) || trySetLanguage(englishTts, Locale.UK)
+                    englishTts?.setSpeechRate(ENGLISH_RATE)
+                    englishTts?.setPitch(1.05f)
+                }
+                _englishVoiceState.value = if (englishReady) VoiceState.READY else VoiceState.MISSING
+            }
+        } catch (e: Exception) {
+            _englishVoiceState.value = VoiceState.MISSING
+            null
+        }
     }
+
+    private fun trySetLanguage(engine: TextToSpeech?, locale: Locale): Boolean {
+        val result = try {
+            engine?.setLanguage(locale)
+        } catch (e: Exception) {
+            null
+        }
+        return result != null &&
+            result != TextToSpeech.LANG_MISSING_DATA &&
+            result != TextToSpeech.LANG_NOT_SUPPORTED
+    }
+
+    /** Says an English word or phrase with the English voice ([slow] for the turtle button). */
+    fun speakEnglish(text: String, slow: Boolean = false) {
+        val engine = englishTts ?: return
+        if (!englishReady) return
+        val clean = englishSpeech(text)
+        if (clean.isEmpty()) return
+        engine.setSpeechRate(if (slow) ENGLISH_SLOW_RATE else ENGLISH_RATE)
+        engine.speak(clean, TextToSpeech.QUEUE_FLUSH, null, "en_${englishCounter++}")
+        engine.setSpeechRate(ENGLISH_RATE)
+    }
+
+    /**
+     * Like [speakEnglish], but suspends until the English voice has finished, so a screen
+     * can follow it with the Romanian voice. Returns false when nothing was spoken.
+     */
+    suspend fun speakEnglishStep(text: String, slow: Boolean = false): Boolean {
+        val clean = englishSpeech(text)
+        if (!englishReady || clean.isEmpty()) return false
+        return suspendCancellableCoroutine { cont ->
+            val engine = englishTts
+            if (engine == null) {
+                cont.resume(false)
+                return@suspendCancellableCoroutine
+            }
+            pendingEnglish?.takeIf { it.isActive }?.resume(false)
+            pendingEnglish = cont
+            val id = "en_${englishCounter++}"
+            engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {}
+                override fun onDone(utteranceId: String?) = finish(utteranceId, true)
+                @Deprecated("Deprecated in Java")
+                override fun onError(utteranceId: String?) = finish(utteranceId, false)
+                override fun onStop(utteranceId: String?, interrupted: Boolean) =
+                    finish(utteranceId, false)
+
+                private fun finish(utteranceId: String?, spoken: Boolean) {
+                    if (utteranceId == id && cont.isActive) cont.resume(spoken)
+                }
+            })
+            cont.invokeOnCancellation { engine.stop() }
+            engine.setSpeechRate(if (slow) ENGLISH_SLOW_RATE else ENGLISH_RATE)
+            val result = engine.speak(clean, TextToSpeech.QUEUE_FLUSH, null, id)
+            engine.setSpeechRate(ENGLISH_RATE)
+            if (result != TextToSpeech.SUCCESS && cont.isActive) cont.resume(false)
+        }
+    }
+
+    private fun englishSpeech(text: String): String = text.replace("…", "").replace("...", "").trim()
 
     fun speakLetter(letter: String) {
         if (!isReady) return
@@ -252,6 +337,7 @@ class SoundManager(context: Context) {
 
     fun stop() {
         tts?.stop()
+        englishTts?.stop()
     }
 
     fun shutdown() {
@@ -260,5 +346,15 @@ class SoundManager(context: Context) {
         tts = null
         isReady = false
         _voiceState.value = VoiceState.MISSING
+        englishTts?.stop()
+        englishTts?.shutdown()
+        englishTts = null
+        englishReady = false
+        _englishVoiceState.value = VoiceState.MISSING
+    }
+
+    private companion object {
+        const val ENGLISH_RATE = 0.8f
+        const val ENGLISH_SLOW_RATE = 0.45f
     }
 }
