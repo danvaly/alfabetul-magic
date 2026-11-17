@@ -456,6 +456,381 @@ object ReadingContent {
                 q("Ce îi arată Mara lui Bip?", "🔤" to "literele", "🔢" to "cifrele", "🎨" to "culorile"),
                 q("Ce citește Bip la final?", "📚" to "povești", "📰" to "ziare", "✉️" to "scrisori")
             )
+        ),
+
+        // --- Level 1: short words, mostly open syllables -------------------------
+        Story(
+            id = "rata_mica", title = "Rața mică", cover = "🦆", level = 1,
+            pages = listOf(
+                page(
+                    Backdrop.FARM, "Ra-ța mi-că se joa-că.",
+                    Actor("🦆", 0.46f, 0.76f, 0.2f, Motion.BOUNCE),
+                    Actor("🌼", 0.7f, 0.84f, 0.12f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.MEADOW, "Un-de e ma-ma ra-ță?",
+                    Actor("🦆", 0.42f, 0.78f, 0.2f, Motion.SWAY),
+                    Actor("❓", 0.56f, 0.46f, 0.16f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.MEADOW, "Ra-ța mi-că o ca-u-tă.",
+                    Actor("🦆", 0.5f, 0.78f, 0.2f, Motion.RUN),
+                    Actor("👀", 0.5f, 0.56f, 0.12f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.MEADOW, "Ea ve-de o va-că ma-re.",
+                    Actor("🦆", 0.22f, 0.8f, 0.16f),
+                    Actor("🐄", 0.62f, 0.66f, 0.42f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.MEADOW, "Va-ca zi-ce: mu, mu, ma-ma e a-ca-să!",
+                    Actor("🐄", 0.62f, 0.66f, 0.4f, Motion.PULSE),
+                    Actor("💬", 0.4f, 0.32f, 0.18f, Motion.FLOAT),
+                    Actor("🦆", 0.22f, 0.8f, 0.16f, Motion.BOUNCE)
+                ),
+                page(
+                    Backdrop.FARM, "Ra-ța mi-că fu-ge a-ca-să.",
+                    Actor("🦆", 0.34f, 0.8f, 0.18f, Motion.RUN),
+                    Actor("🏠", 0.74f, 0.56f, 0.36f)
+                ),
+                page(
+                    Backdrop.FARM, "Ma-ma ra-ță o ia sub a-ri-pă.",
+                    Actor("🦆", 0.48f, 0.7f, 0.36f, Motion.PULSE),
+                    Actor("🦆", 0.62f, 0.8f, 0.16f, Motion.BOUNCE),
+                    Actor("❤️", 0.56f, 0.36f, 0.14f, Motion.FLOAT)
+                )
+            ),
+            questions = listOf(
+                q("Pe cine caută rața mică?", "🦆" to "pe mama rață", "🐄" to "pe vacă", "🐶" to "pe cățel"),
+                q("Ce zice vaca?", "🐄" to "mu, mu", "🐶" to "ham, ham", "🐱" to "miau"),
+                q("Unde fuge rața mică?", "🏠" to "acasă", "🌲" to "în pădure", "🏫" to "la școală")
+            )
+        ),
+        Story(
+            id = "tortul_radu", title = "Tortul lui Radu", cover = "🎂", level = 1,
+            pages = listOf(
+                page(
+                    Backdrop.ROOM, "Azi e zi-ua lui Ra-du.",
+                    Actor("👦", 0.46f, 0.64f, 0.36f, Motion.BOUNCE),
+                    Actor("🎈", 0.72f, 0.3f, 0.2f, Motion.FLOAT),
+                    Actor("🎈", 0.86f, 0.4f, 0.16f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.ROOM, "Ra-du a-re șa-se ani.",
+                    Actor("👦", 0.4f, 0.64f, 0.36f, Motion.PULSE),
+                    Actor("6️⃣", 0.68f, 0.4f, 0.2f, Motion.BOUNCE)
+                ),
+                page(
+                    Backdrop.ROOM, "Ma-ma a-du-ce un tort ma-re.",
+                    Actor("👩", 0.3f, 0.62f, 0.38f),
+                    Actor("🎂", 0.64f, 0.72f, 0.28f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.ROOM, "Pi-si-ca vi-ne la tort.",
+                    Actor("🐱", 0.3f, 0.74f, 0.24f, Motion.RUN),
+                    Actor("🎂", 0.68f, 0.72f, 0.28f)
+                ),
+                page(
+                    Backdrop.ROOM, "Pi-si-ca a-re cre-mă pe nas!",
+                    Actor("😹", 0.42f, 0.62f, 0.36f, Motion.BOUNCE),
+                    Actor("🎂", 0.74f, 0.74f, 0.24f)
+                ),
+                page(
+                    Backdrop.ROOM, "Ra-du râ-de și ia o fe-li-e.",
+                    Actor("😄", 0.3f, 0.6f, 0.34f, Motion.BOUNCE),
+                    Actor("🍰", 0.56f, 0.76f, 0.2f, Motion.PULSE),
+                    Actor("🐱", 0.8f, 0.76f, 0.2f, Motion.SWAY)
+                )
+            ),
+            questions = listOf(
+                q("Ce aduce mama?", "🎂" to "un tort", "🍲" to "o supă", "🍎" to "un măr"),
+                q("Câți ani are Radu?", "6️⃣" to "șase", "3️⃣" to "trei", "9️⃣" to "nouă"),
+                q("Ce are pisica pe nas?", "🎂" to "cremă", "💧" to "apă", "🌸" to "o floare")
+            )
+        ),
+        Story(
+            id = "balonul_inei", title = "Balonul Inei", cover = "🎈", level = 1,
+            pages = listOf(
+                page(
+                    Backdrop.MEADOW, "I-na a-re un ba-lon.",
+                    Actor("👧", 0.36f, 0.66f, 0.36f),
+                    Actor("🎈", 0.56f, 0.34f, 0.24f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.MEADOW, "Ba-lo-nul e ro-șu.",
+                    Actor("🎈", 0.5f, 0.48f, 0.44f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.MEADOW, "Vi-ne vân-tul: vâj!",
+                    Actor("💨", 0.24f, 0.36f, 0.22f, Motion.RUN),
+                    Actor("🎈", 0.62f, 0.32f, 0.22f, Motion.SWAY),
+                    Actor("👧", 0.62f, 0.72f, 0.28f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.MEADOW, "Ba-lo-nul zboa-ră sus, sus.",
+                    Actor("🎈", 0.56f, 0.14f, 0.16f, Motion.FLOAT),
+                    Actor("😮", 0.42f, 0.74f, 0.26f)
+                ),
+                page(
+                    Backdrop.FOREST, "Ba-lo-nul e sus în co-pac.",
+                    Actor("🌳", 0.5f, 0.5f, 0.45f),
+                    Actor("🎈", 0.56f, 0.32f, 0.16f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.FOREST, "Ta-ta ia ba-lo-nul.",
+                    Actor("👨", 0.4f, 0.64f, 0.38f, Motion.BOUNCE),
+                    Actor("🎈", 0.6f, 0.3f, 0.2f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.MEADOW, "I-na îi dă ta-tei un pu-pic.",
+                    Actor("👨", 0.32f, 0.62f, 0.38f),
+                    Actor("👧", 0.58f, 0.7f, 0.3f, Motion.BOUNCE),
+                    Actor("😘", 0.46f, 0.32f, 0.14f, Motion.FLOAT),
+                    Actor("🎈", 0.8f, 0.36f, 0.2f, Motion.SWAY)
+                )
+            ),
+            questions = listOf(
+                q("Ce are Ina?", "🎈" to "un balon", "⚽" to "o minge", "📕" to "o carte"),
+                q("Ce culoare are balonul?", "❤️" to "roșu", "💙" to "albastru", "💚" to "verde"),
+                q("Cine ia balonul din copac?", "👨" to "tata", "👵" to "bunica", "🐦" to "o pasăre")
+            )
+        ),
+
+        // --- Level 2 ---------------------------------------------------------------
+        Story(
+            id = "trenul", title = "Cu trenul la mare", cover = "🚂", level = 2,
+            pages = listOf(
+                page(
+                    Backdrop.MEADOW, "Ma-tei mer-ge cu tre-nul.",
+                    Actor("👦", 0.24f, 0.68f, 0.32f, Motion.BOUNCE),
+                    Actor("🚂", 0.64f, 0.7f, 0.36f)
+                ),
+                page(
+                    Backdrop.MEADOW, "Tre-nul plea-că din ga-ră.",
+                    Actor("🚂", 0.5f, 0.72f, 0.36f, Motion.RUN),
+                    Actor("💨", 0.24f, 0.5f, 0.18f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.FARM, "Ma-tei ve-de vaci și oi.",
+                    Actor("🐄", 0.3f, 0.7f, 0.3f, Motion.SWAY),
+                    Actor("🐑", 0.56f, 0.76f, 0.22f, Motion.BOUNCE),
+                    Actor("🐑", 0.74f, 0.78f, 0.18f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.FOREST, "Tre-nul tre-ce prin pă-du-re.",
+                    Actor("🚂", 0.5f, 0.76f, 0.34f, Motion.RUN)
+                ),
+                page(
+                    Backdrop.NIGHT, "În tu-nel e în-tu-ne-ric.",
+                    Actor("🚂", 0.42f, 0.74f, 0.32f, Motion.RUN),
+                    Actor("😮", 0.72f, 0.46f, 0.2f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.BEACH, "Ma-tei a-jun-ge la ma-re!",
+                    Actor("👦", 0.3f, 0.76f, 0.3f, Motion.BOUNCE),
+                    Actor("⛱️", 0.72f, 0.72f, 0.32f),
+                    Actor("🌊", 0.56f, 0.46f, 0.2f, Motion.SWAY)
+                )
+            ),
+            questions = listOf(
+                q("Cu ce merge Matei?", "🚂" to "cu trenul", "🚗" to "cu mașina", "✈️" to "cu avionul"),
+                q("Ce animale vede Matei?", "🐄" to "vaci și oi", "🦁" to "lei", "🐘" to "elefanți"),
+                q("Unde ajunge Matei?", "🌊" to "la mare", "🏔️" to "la munte", "🏫" to "la școală")
+            )
+        ),
+        Story(
+            id = "pestele_mic", title = "Peștele cel mic", cover = "🐠", level = 2,
+            pages = listOf(
+                page(
+                    Backdrop.BEACH, "Un peș-te mic î-noa-tă în ma-re.",
+                    Actor("🐠", 0.46f, 0.5f, 0.2f, Motion.RUN)
+                ),
+                page(
+                    Backdrop.BEACH, "Peș-te-le e sin-gur.",
+                    Actor("🐠", 0.5f, 0.5f, 0.2f, Motion.SWAY),
+                    Actor("💭", 0.66f, 0.24f, 0.18f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.BEACH, "El ve-de un crab ro-șu.",
+                    Actor("🐠", 0.32f, 0.48f, 0.18f, Motion.SWAY, flip = true),
+                    Actor("🦀", 0.62f, 0.8f, 0.24f, Motion.BOUNCE)
+                ),
+                page(
+                    Backdrop.BEACH, "Cra-bul zi-ce: Hai la joa-că!",
+                    Actor("🦀", 0.56f, 0.8f, 0.24f, Motion.SWAY),
+                    Actor("💬", 0.72f, 0.56f, 0.16f, Motion.PULSE),
+                    Actor("🐠", 0.32f, 0.5f, 0.18f, Motion.BOUNCE)
+                ),
+                page(
+                    Backdrop.BEACH, "Vi-ne și un del-fin.",
+                    Actor("🐬", 0.66f, 0.46f, 0.26f, Motion.BOUNCE),
+                    Actor("🐠", 0.3f, 0.52f, 0.16f),
+                    Actor("🦀", 0.44f, 0.82f, 0.18f)
+                ),
+                page(
+                    Backdrop.BEACH, "A-cum peș-te-le a-re doi pri-e-teni.",
+                    Actor("🐠", 0.5f, 0.5f, 0.2f, Motion.PULSE),
+                    Actor("🐬", 0.76f, 0.44f, 0.22f, Motion.SWAY),
+                    Actor("🦀", 0.26f, 0.8f, 0.18f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.BEACH, "Ei se joa-că toa-tă zi-ua.",
+                    Actor("🐠", 0.36f, 0.48f, 0.18f, Motion.RUN),
+                    Actor("🐬", 0.66f, 0.44f, 0.22f, Motion.BOUNCE),
+                    Actor("🦀", 0.5f, 0.82f, 0.18f, Motion.BOUNCE)
+                )
+            ),
+            questions = listOf(
+                q("Unde înoată peștele?", "🌊" to "în mare", "🌲" to "în pădure", "🛁" to "în cadă"),
+                q("Ce culoare are crabul?", "❤️" to "roșu", "💛" to "galben", "💚" to "verde"),
+                q("Câți prieteni are peștele la final?", "2️⃣" to "doi", "1️⃣" to "unul", "5️⃣" to "cinci")
+            )
+        ),
+        Story(
+            id = "ariciul_marul", title = "Ariciul și mărul", cover = "🦔", level = 2,
+            pages = listOf(
+                page(
+                    Backdrop.FOREST, "Un a-rici mic se plim-bă prin pă-du-re.",
+                    Actor("🦔", 0.4f, 0.8f, 0.22f, Motion.RUN)
+                ),
+                page(
+                    Backdrop.FOREST, "El ve-de un măr ro-șu în pom.",
+                    Actor("🌳", 0.64f, 0.5f, 0.45f),
+                    Actor("🍎", 0.68f, 0.36f, 0.12f, Motion.SWAY),
+                    Actor("🦔", 0.26f, 0.82f, 0.2f)
+                ),
+                page(
+                    Backdrop.FOREST, "Poc! Mă-rul ca-de pe spa-te-le lui.",
+                    Actor("🦔", 0.46f, 0.8f, 0.24f, Motion.PULSE),
+                    Actor("🍎", 0.46f, 0.62f, 0.14f, Motion.BOUNCE),
+                    Actor("💥", 0.62f, 0.5f, 0.12f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.FOREST, "A-ri-ciul du-ce mă-rul a-ca-să.",
+                    Actor("🦔", 0.46f, 0.8f, 0.24f, Motion.RUN, flip = true),
+                    Actor("🍎", 0.46f, 0.64f, 0.12f, Motion.RUN)
+                ),
+                page(
+                    Backdrop.EVENING, "Ma-ma fa-ce o plă-cin-tă cu me-re.",
+                    Actor("🦔", 0.26f, 0.72f, 0.3f),
+                    Actor("🥧", 0.6f, 0.76f, 0.24f, Motion.PULSE),
+                    Actor("♨️", 0.6f, 0.54f, 0.12f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.EVENING, "A-ri-ciul mă-nân-că și zâm-beș-te.",
+                    Actor("🦔", 0.36f, 0.74f, 0.26f, Motion.BOUNCE),
+                    Actor("😋", 0.36f, 0.42f, 0.16f, Motion.FLOAT),
+                    Actor("🥧", 0.66f, 0.78f, 0.2f)
+                )
+            ),
+            questions = listOf(
+                q("Ce vede ariciul în pom?", "🍎" to "un măr", "🍐" to "o pară", "🍌" to "o banană"),
+                q("Unde cade mărul?", "🦔" to "pe spatele ariciului", "💧" to "în apă", "🏠" to "pe casă"),
+                q("Ce face mama?", "🥧" to "o plăcintă", "🍲" to "o supă", "🎂" to "un tort")
+            )
+        ),
+
+        // --- Level 3 ---------------------------------------------------------------
+        Story(
+            id = "dragonul_fricos", title = "Dragonul fricos", cover = "🐉", level = 3,
+            pages = listOf(
+                page(
+                    Backdrop.FOREST, "Bu-bu e un dra-gon mic și ver-de.",
+                    Actor("🐉", 0.48f, 0.68f, 0.38f, Motion.BOUNCE)
+                ),
+                page(
+                    Backdrop.FOREST, "Toți dra-go-nii scui-pă foc.",
+                    Actor("🐲", 0.24f, 0.56f, 0.26f, Motion.PULSE),
+                    Actor("🔥", 0.44f, 0.58f, 0.2f, Motion.PULSE),
+                    Actor("🐲", 0.78f, 0.56f, 0.26f, Motion.PULSE, flip = true),
+                    Actor("🔥", 0.6f, 0.62f, 0.16f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.FOREST, "Dar lui Bu-bu îi e fri-că de foc.",
+                    Actor("🐉", 0.3f, 0.7f, 0.3f, Motion.SWAY, flip = true),
+                    Actor("😨", 0.3f, 0.36f, 0.14f, Motion.PULSE),
+                    Actor("🔥", 0.74f, 0.74f, 0.2f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.MEADOW, "Bu-bu su-flă și ies flori!",
+                    Actor("🐉", 0.26f, 0.66f, 0.32f, Motion.PULSE),
+                    Actor("🌸", 0.5f, 0.5f, 0.14f, Motion.FLOAT),
+                    Actor("🌼", 0.64f, 0.38f, 0.14f, Motion.FLOAT),
+                    Actor("🌷", 0.78f, 0.54f, 0.14f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.MEADOW, "O fe-ti-ță pri-meș-te o floa-re.",
+                    Actor("🐉", 0.26f, 0.68f, 0.3f),
+                    Actor("🌸", 0.5f, 0.56f, 0.14f, Motion.PULSE),
+                    Actor("👧", 0.72f, 0.66f, 0.34f, Motion.BOUNCE)
+                ),
+                page(
+                    Backdrop.MEADOW, "Ea zâm-beș-te: Mul-țu-mesc, Bu-bu!",
+                    Actor("😊", 0.66f, 0.56f, 0.3f, Motion.BOUNCE),
+                    Actor("🌸", 0.48f, 0.64f, 0.12f),
+                    Actor("🐉", 0.26f, 0.68f, 0.3f, Motion.SWAY)
+                ),
+                page(
+                    Backdrop.EVENING, "A-cum Bu-bu e cel mai fe-ri-cit dra-gon.",
+                    Actor("🐉", 0.42f, 0.66f, 0.36f, Motion.BOUNCE),
+                    Actor("💐", 0.7f, 0.74f, 0.22f, Motion.PULSE),
+                    Actor("✨", 0.64f, 0.34f, 0.14f, Motion.FLOAT)
+                )
+            ),
+            questions = listOf(
+                q("De ce îi este frică lui Bubu?", "🔥" to "de foc", "💧" to "de apă", "🌙" to "de întuneric"),
+                q("Ce iese când suflă Bubu?", "🌸" to "flori", "🔥" to "foc", "💨" to "fum"),
+                q("Cine primește o floare?", "👧" to "o fetiță", "👵" to "o bunică", "🐱" to "o pisică")
+            )
+        ),
+        Story(
+            id = "prima_zi_scoala", title = "Prima zi de școală", cover = "🎒", level = 3,
+            pages = listOf(
+                page(
+                    Backdrop.ROOM, "E-ma a-re un ghioz-dan nou.",
+                    Actor("👧", 0.36f, 0.62f, 0.36f, Motion.BOUNCE),
+                    Actor("🎒", 0.66f, 0.72f, 0.26f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.ROOM, "În ghioz-dan sunt cre-ioa-ne și ca-ie-te.",
+                    Actor("🎒", 0.3f, 0.7f, 0.3f),
+                    Actor("✏️", 0.56f, 0.6f, 0.16f, Motion.SWAY),
+                    Actor("📚", 0.76f, 0.72f, 0.22f, Motion.PULSE)
+                ),
+                page(
+                    Backdrop.MEADOW, "E-ma mer-ge la școa-lă cu ma-ma.",
+                    Actor("👩", 0.2f, 0.64f, 0.34f, Motion.RUN),
+                    Actor("👧", 0.36f, 0.72f, 0.26f, Motion.RUN),
+                    Actor("🏫", 0.74f, 0.56f, 0.4f)
+                ),
+                page(
+                    Backdrop.ROOM, "E-ma e pu-țin spe-ri-a-tă.",
+                    Actor("😟", 0.5f, 0.6f, 0.36f, Motion.SWAY),
+                    Actor("🎒", 0.74f, 0.76f, 0.2f)
+                ),
+                page(
+                    Backdrop.ROOM, "Doam-na în-vă-ță-toa-re zâm-beș-te.",
+                    Actor("👩‍🏫", 0.46f, 0.6f, 0.4f, Motion.PULSE),
+                    Actor("😊", 0.72f, 0.34f, 0.14f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.ROOM, "Lân-gă E-ma stă o fe-ti-ță ve-se-lă.",
+                    Actor("👧", 0.36f, 0.66f, 0.32f),
+                    Actor("👧", 0.64f, 0.66f, 0.32f, Motion.BOUNCE, flip = true),
+                    Actor("😄", 0.64f, 0.34f, 0.12f, Motion.FLOAT)
+                ),
+                page(
+                    Backdrop.ROOM, "A-cum E-ma a-re o pri-e-te-nă.",
+                    Actor("👧", 0.36f, 0.66f, 0.32f, Motion.BOUNCE),
+                    Actor("👧", 0.62f, 0.66f, 0.32f, Motion.BOUNCE, flip = true),
+                    Actor("❤️", 0.49f, 0.36f, 0.14f, Motion.PULSE)
+                )
+            ),
+            questions = listOf(
+                q("Ce are Ema nou?", "🎒" to "un ghiozdan", "👟" to "pantofi", "🎩" to "o pălărie"),
+                q("Cu cine merge Ema la școală?", "👩" to "cu mama", "👴" to "cu bunicul", "🐶" to "cu cățelul"),
+                q("Pe cine are Ema la final?", "👧" to "o prietenă", "🐱" to "o pisică", "🤖" to "un robot")
+            )
         )
     )
 

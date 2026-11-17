@@ -73,6 +73,49 @@ class ReadingContentTest {
     }
 
     @Test
+    fun `library has sixteen stories spread over three levels`() {
+        val stories = ReadingContent.stories
+        assertTrue("expected at least 16 stories, got ${stories.size}", stories.size >= 16)
+        assertEquals(stories.size, stories.map { it.id }.toSet().size)
+        assertEquals(stories.size, stories.map { it.title }.toSet().size)
+        assertTrue(stories.all { it.level in 1..3 })
+        val byLevel = stories.groupingBy { it.level }.eachCount()
+        assertTrue("level 1: ${byLevel[1]}", (byLevel[1] ?: 0) >= 5)
+        assertTrue("level 2: ${byLevel[2]}", (byLevel[2] ?: 0) >= 5)
+        assertTrue("level 3: ${byLevel[3]}", (byLevel[3] ?: 0) >= 5)
+        stories.forEach { assertEquals(it, ReadingContent.getStory(it.id)) }
+    }
+
+    @Test
+    fun `new stories follow the beginner format`() {
+        val newIds = listOf(
+            "rata_mica", "tortul_radu", "balonul_inei", "trenul",
+            "pestele_mic", "ariciul_marul", "dragonul_fricos", "prima_zi_scoala"
+        )
+        newIds.forEach { id ->
+            val story = ReadingContent.getStory(id)
+            assertTrue("missing story $id", story != null)
+            story!!
+            assertTrue("$id: 5-7 pages", story.pages.size in 5..7)
+            assertEquals("$id: 3 questions", 3, story.questions.size)
+            story.pages.forEach { page ->
+                assertTrue("$id: one sentence per page", page.markedText.count { it == '.' } <= 1)
+                page.scene.actors.forEach { actor ->
+                    assertTrue("$id: actor size ${actor.size}", actor.size in 0.1f..0.45f)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `syllables never contain separators or spaces`() {
+        ReadingContent.stories.flatMap { it.pages }.flatMap { it.words }.forEach { word ->
+            assertTrue(word.syllables.none { it.contains('-') || it.isBlank() })
+            assertTrue("'${word.text}' joins back", word.text == word.syllables.joinToString(""))
+        }
+    }
+
+    @Test
     fun `trainer levels have enough distinct picture words`() {
         ReadingContent.trainerLevels.forEach { level ->
             assertTrue(level.words.size >= 8)

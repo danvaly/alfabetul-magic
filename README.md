@@ -9,7 +9,7 @@
 <h1 align="center">Alfabetul Magic Ad Free</h1>
 
 <p align="center">
-  <strong>A fun, Duolingo-inspired Android app that teaches kids the Romanian alphabet through interactive games, handwriting practice, and animated stories. 100% free</strong>
+  <strong>A fun, Duolingo-inspired Android app that teaches kids the Romanian alphabet and first-grade reading through interactive games, handwriting practice, and animated stories. 100% free</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## Overview
 
-**Alfabetul Magic** is a native Android application built entirely with **Jetpack Compose** and **Material 3**, designed to help young children (ages 3-7) learn the Romanian alphabet. The app features a vibrant, playful UI with floating animals, bouncing animations, and a Duolingo-style 3D card design that keeps kids engaged while they learn letters, diacritics, words, and sentences.
+**Alfabetul Magic** is a native Android application built entirely with **Jetpack Compose** and **Material 3**, designed to help young children (ages 3-7) learn the Romanian alphabet and, in first grade, learn to read: letters, syllables, words and short stories. The app features a vibrant, playful UI with floating animals, bouncing animations, and a Duolingo-style 3D card design that keeps kids engaged while they learn letters, diacritics, words, and sentences.
 
 Every screen is landscape-optimized for tablet and phone use, with large touch targets, colorful feedback, and Text-to-Speech pronunciation in Romanian.
 
@@ -33,12 +33,25 @@ Every screen is landscape-optimized for tablet and phone use, with large touch t
 | Mode | Description |
 |------|-------------|
 | **Invata Literele** | Browse all 31 Romanian letters with pronunciation, example words, and emoji illustrations |
-| **Scrie Literele** | Handwriting practice with a guided tracing canvas and zone-based scoring (1-3 stars) |
+| **Scrie Literele** | Handwriting practice with a guided tracing canvas and zone-based scoring (1-3 stars), in the cursive school handwriting used in Romanian first grade |
 | **Formeaza Silabe** | Combine consonants and vowels to form syllables and simple words |
 | **Povesti cu Litere** | Animated letter stories with TTS narration for each letter |
+
+### Reading (**Citesc** hub)
+
+All reading activities live together in one menu, **Citesc**.
+
+| Mode | Description |
+|------|-------------|
 | **Citesc Pas cu Pas** | Guided reading trainer: sound out the letters, join them into syllables, read the whole word, then pick the matching picture. 4 levels (simple syllables, new words, long words, letter groups ce/ci/ge/gi/che/chi/ghe/ghi) |
-| **Povești de Citit** | 8 illustrated, animated short stories in 3 levels, written in short sentences. Syllable view (ma-ma) or whole words, upper/lower case, slow voice, "listen" and "read together" with highlighting, and comprehension questions at the end |
+| **Povești de Citit** | 16 illustrated, animated short stories in 3 levels, one short sentence per page. Syllable view (ma-ma) or whole words, upper/lower case, print or cursive letters, slow voice, "listen" and "read together" with highlighting, and comprehension questions at the end |
+| **Citesc eu / Mă înregistrez / Ascultă-mă** | In a story the child can read a page aloud: "Citesc eu" listens and colours the words it recognised (forgiving missing diacritics); "Mă înregistrez" records the child's voice and "Ascultă-mă" plays it back |
 | **Analiza cuvântului** | Tap any word in a story to take it apart: letters (vowels / consonants / letter groups), syllables, whole word, with a step-by-step playback |
+| **Scrie cuvântul** | See a picture, hear the word and build it from letter tiles, syllable by syllable |
+| **Desparte în silabe** | Cut a word into syllables between its letters, then check; correct words are clapped syllable by syllable |
+| **Litere care seamănă** | Practice letters that are easy to mix up (b/d, p/b, m/n, s/ș, t/ț, a/ă, i/î, ...) |
+| **Cuvintele mele grele** | Every word the child looked up or read wrong is collected here; tap one to analyse it, or practise them as flash cards ("Ascultă", "Pe silabe", "Am citit bine 👍" / "Mai exersez") |
+| **Albumul cu abțibilduri** | A sticker album: stickers are earned for reaching the daily reading goal, finishing a story and practising the hard words |
 
 ### Games (8 mini-games)
 
@@ -55,12 +68,15 @@ Every screen is landscape-optimized for tablet and phone use, with large touch t
 
 ### Additional Features
 
+- **Profiluri** - Several children can use the same device; each profile has its own name, avatar, progress, stars and stickers
+- **Obiectivul zilei** - A daily reading goal (10 minutes by default, set by the parent) shown on the home screen; reaching it earns a sticker
 - **Provocarea Zilei** - A daily word-of-the-day challenge that rotates through 31 words
-- **Progresul Meu** - Track stars earned, letters learned, games played, and streaks
-- **Panou Parinti** - Parent dashboard (behind a math-problem gate) with stats overview and difficulty settings
-- **3 Difficulty Levels** - Beginner (slower, hints), Intermediate (balanced), Advanced (faster, more options)
+- **Progresul Meu** - Track stars earned, letters learned, stories read, games played, today's minutes and streaks
+- **Panou Parinti** - Parent dashboard (behind a math-problem gate) with stats overview, daily goal and difficulty settings
+- **3 Difficulty Levels** - Beginner (slower, hints), Intermediate (balanced), Advanced (faster, more options), applied in the games
+- **Scris de mână** - A cursive school handwriting font (Playwrite RO) for tracing and for reading
 - **Confetti Celebrations** - Colorful particle animations on achievements
-- **Romanian TTS** - Natural text-to-speech pronunciation for all letters and words
+- **Romanian TTS** - Natural text-to-speech pronunciation for all letters and words, with a friendly banner and a shortcut to the voice settings when the Romanian voice is missing
 
 ---
 
@@ -96,6 +112,12 @@ app/src/main/java/com/danvaly/alfabet/
 │   └── SoundManager.kt               # TTS wrapper for Romanian pronunciation
 ├── data/
 │   ├── RomanianAlphabet.kt            # All 31 letters, words, stories, rhymes, sentences
+│   ├── ReadingContent.kt              # Reading stories, illustrations and trainer words
+│   ├── ReadingGames.kt                # Logic for spelling, syllable splitting, similar letters
+│   ├── ReadingMatcher.kt              # Matches what the child read aloud with the sentence
+│   ├── ReadingProgressStore.kt        # Reading stars, hard words, daily goal, stickers
+│   ├── ProfileManager.kt              # Child profiles
+│   ├── ProgressMerge.kt               # Streak and progress helpers
 │   ├── DifficultyManager.kt           # Beginner / Intermediate / Advanced settings
 │   ├── local/
 │   │   ├── AppDatabase.kt             # Room database (v2)
@@ -113,9 +135,11 @@ app/src/main/java/com/danvaly/alfabet/
     │   ├── ConfettiAnimation.kt       # 60-particle celebration effect
     │   ├── TracingCanvas.kt           # Handwriting canvas with scoring
     │   ├── LetterCard.kt              # Reusable letter display card
+    │   ├── StoryIllustration.kt       # Animated story pictures (backdrop + emoji actors)
+    │   ├── WordAnalysis.kt            # Letters / syllables / word analysis dialog
     │   └── StarRating.kt              # Star rating component
     ├── screens/
-    │   ├── HomeScreen.kt              # Main menu with 7 mode cards
+    │   ├── HomeScreen.kt              # Main menu: profile, daily goal, mode cards
     │   ├── LearnScreen.kt             # Alphabet grid browser
     │   ├── LetterDetailScreen.kt      # Individual letter deep-dive
     │   ├── TraceScreen.kt             # Handwriting practice
@@ -132,6 +156,14 @@ app/src/main/java/com/danvaly/alfabet/
     │   ├── SentenceBuildScreen.kt     # Sentence construction
     │   ├── RhymingGameScreen.kt       # Rhyming word game
     │   ├── AlphabetOrderScreen.kt     # Letter ordering game
+    │   ├── ReadingHubScreen.kt        # "Citesc" menu of all reading activities
+    │   ├── ReadingTrainerScreen.kt    # Step-by-step reading trainer
+    │   ├── StoriesScreen.kt           # Story library + story reader
+    │   ├── SpellWordScreen.kt         # "Scrie cuvântul"
+    │   ├── SyllableSplitScreen.kt     # "Desparte în silabe"
+    │   ├── ConfusableLettersScreen.kt # "Litere care seamănă"
+    │   ├── HardWordsScreen.kt         # "Cuvintele mele grele" + flash cards
+    │   ├── StickerAlbumScreen.kt      # Sticker album
     │   ├── ParentDashboardScreen.kt   # Parent stats + settings
     │   └── ProgressScreen.kt          # Progress & achievements
     └── theme/
@@ -219,6 +251,9 @@ Each letter includes:
 | Sentences | 15 | Simple sentences for the building game |
 | Diacritic Exercises | 10 | Comparison drills for special characters |
 | Daily Words | 31 | Rotating word-of-the-day entries |
+| Reading Stories | 16 | Illustrated stories in 3 levels (5 / 6 / 5), each with 2-3 comprehension questions |
+| Trainer Words | 50+ | Picture words in 4 reading-trainer levels |
+| Stickers | 60+ | Emoji stickers for the album |
 
 ---
 
@@ -237,7 +272,7 @@ Each letter includes:
               │            │            │
         ┌─────▼─────┐ ┌───▼────┐ ┌────▼─────┐
         │  Screens   │ │ Theme  │ │Components│
-        │ (18 total) │ │        │ │          │
+        │ (29 total) │ │        │ │          │
         └─────┬──────┘ └────────┘ └──────────┘
               │
     ┌─────────┼─────────┐
@@ -253,8 +288,9 @@ Each letter includes:
          └──────┘
 ```
 
-- **Single Activity** with Compose Navigation managing all 18 screens
-- **Repository pattern** abstracts Room database access behind Kotlin Flows
+- **Single Activity** with Compose Navigation managing all 29 screens
+- **Repository pattern** abstracts Room database access behind Kotlin Flows (one database per child profile)
+- **ReadingProgressStore** keeps reading stars, word statistics, the daily goal and stickers in per-profile preferences
 - **SoundManager** wraps Android TTS for Romanian pronunciation
 - **DifficultyManager** provides speed/options/hint settings per level
 - **No ViewModels** - state is managed at the composable level with `remember` and `mutableStateOf` for simplicity appropriate to the app's scope
