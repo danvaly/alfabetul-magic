@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -112,6 +113,7 @@ fun AlphabetOrderScreen(
                     colors = listOf(Color(0xFFE0F7FA), Color(0xFFB2EBF2), Color(0xFFE0F2F1))
                 )
             )
+            .systemBarsPadding()
     ) {
         Text(
             text = "\uD83D\uDC22",
@@ -150,10 +152,10 @@ fun AlphabetOrderScreen(
                         .clip(CircleShape)
                         .background(DuoBlue.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoBlue)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoBlue)
                 }
                 Text(
-                    text = "\uD83D\uDD24 Ordoneaza Alfabetul",
+                    text = "\uD83D\uDD24 Ordonează alfabetul",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoBlue,
                     fontWeight = FontWeight.ExtraBold
@@ -196,7 +198,7 @@ fun AlphabetOrderScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "Pune literele in ordine:",
+                            text = "Pune literele în ordine:",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = OnBackground,
@@ -225,7 +227,7 @@ fun AlphabetOrderScreen(
                             ) {
                                 if (selectedOrder.isEmpty()) {
                                     Text(
-                                        text = "Atinge literele in ordine alfabetica...",
+                                        text = "Atinge literele în ordine alfabetică...",
                                         color = OnBackgroundLight,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
@@ -259,7 +261,7 @@ fun AlphabetOrderScreen(
                         if (showFeedback) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = if (isCorrect) "\u2705 Corect!" else "\u274C Ordinea corecta: ${sortedSubset.joinToString(" ")}",
+                                text = if (isCorrect) "\u2705 Corect!" else "\u274C Ordinea corectă: ${sortedSubset.joinToString(" ")}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isCorrect) DuoGreen else DuoRed,
@@ -358,7 +360,7 @@ fun AlphabetOrderScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = DuoGreen),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
-                                Text("Verifica!", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                Text("Verifică!", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             }
                         }
                     }
@@ -386,7 +388,7 @@ fun AlphabetOrderScreen(
                     Text("\uD83C\uDF89", fontSize = 56.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Felicitari!",
+                        text = "Felicitări!",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Black,
                         color = DuoGreen

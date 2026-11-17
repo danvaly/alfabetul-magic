@@ -17,19 +17,29 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
 
     companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
+        const val DEFAULT_NAME = "alfabet_magic.db"
 
-        fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "alfabet_magic.db"
-                ).fallbackToDestructiveMigration()
-                    .build()
-                INSTANCE = instance
-                instance
+        /** One open database per file name (one file per child profile). */
+        private val instances = mutableMapOf<String, AppDatabase>()
+
+        fun getInstance(context: Context, dbName: String = DEFAULT_NAME): AppDatabase =
+            synchronized(instances) {
+                instances.getOrPut(dbName) {
+                    Room.databaseBuilder(
+                        context.applicationContext,
+                        AppDatabase::class.java,
+                        dbName
+                    ).fallbackToDestructiveMigration()
+                        .build()
+                }
+            }
+
+        /** Closes and forgets the database with this name (used before its file is deleted). */
+        fun closeInstance(dbName: String) {
+            val db = synchronized(instances) { instances.remove(dbName) }
+            try {
+                db?.close()
+            } catch (e: Exception) {
             }
         }
     }

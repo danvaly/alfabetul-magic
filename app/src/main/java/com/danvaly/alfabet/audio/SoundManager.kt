@@ -1,19 +1,31 @@
 package com.danvaly.alfabet.audio
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import com.danvaly.alfabet.data.RomanianAlphabet
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
 import kotlin.coroutines.resume
+
+/** Whether a Romanian text-to-speech voice can be used. */
+enum class VoiceState { LOADING, READY, MISSING }
 
 class SoundManager(context: Context) {
 
     private var tts: TextToSpeech? = null
     private var isReady = false
+
+    private val _voiceState = MutableStateFlow(VoiceState.LOADING)
+
+    /** LOADING until the engine answers, then READY or MISSING (no engine / no Romanian voice). */
+    val voiceState: StateFlow<VoiceState> = _voiceState.asStateFlow()
     private val romanianLocale = Locale("ro", "RO")
 
     // Romanian phonetic pronunciation hints for more natural speech
@@ -52,16 +64,25 @@ class SoundManager(context: Context) {
     )
 
     init {
-        tts = TextToSpeech(context.applicationContext) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                val result = tts?.setLanguage(romanianLocale)
-                isReady = result != TextToSpeech.LANG_MISSING_DATA
-                        && result != TextToSpeech.LANG_NOT_SUPPORTED
-                // Natural conversational rate - slightly slower for children
-                tts?.setSpeechRate(0.82f)
-                // Warmer, more natural pitch
-                tts?.setPitch(1.1f)
+        tts = try {
+            TextToSpeech(context.applicationContext) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    val result = tts?.setLanguage(romanianLocale)
+                    isReady = result != null
+                            && result != TextToSpeech.LANG_MISSING_DATA
+                            && result != TextToSpeech.LANG_NOT_SUPPORTED
+                    // Natural conversational rate - slightly slower for children
+                    tts?.setSpeechRate(0.82f)
+                    // Warmer, more natural pitch
+                    tts?.setPitch(1.1f)
+                } else {
+                    isReady = false
+                }
+                _voiceState.value = if (isReady) VoiceState.READY else VoiceState.MISSING
             }
+        } catch (e: Exception) {
+            _voiceState.value = VoiceState.MISSING
+            null
         }
     }
 
@@ -208,6 +229,27 @@ class SoundManager(context: Context) {
         return RomanianAlphabet.getLetterByUppercase(unit.uppercase())?.phoneticSound ?: key
     }
 
+    /**
+     * Opens the system screen where the parent can install the Romanian voice data,
+     * falling back to the general text-to-speech settings.
+     */
+    fun openVoiceSettings(context: Context) {
+        val install = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val settings = Intent("com.android.settings.TTS_SETTINGS")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val voice = Intent(android.provider.Settings.ACTION_SETTINGS)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        for (intent in listOf(install, settings, voice)) {
+            try {
+                context.startActivity(intent)
+                return
+            } catch (e: Exception) {
+                // try the next option
+            }
+        }
+    }
+
     fun stop() {
         tts?.stop()
     }
@@ -217,5 +259,6 @@ class SoundManager(context: Context) {
         tts?.shutdown()
         tts = null
         isReady = false
+        _voiceState.value = VoiceState.MISSING
     }
 }

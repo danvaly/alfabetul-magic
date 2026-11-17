@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -44,6 +45,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -63,6 +65,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
+import com.danvaly.alfabet.data.DifficultyLevel
+import com.danvaly.alfabet.data.DifficultyManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.StarRating
@@ -92,8 +96,16 @@ fun MatchGameScreen(
     val secondSelection = remember { mutableStateOf<Int?>(null) }
     var isChecking by remember { mutableStateOf(false) }
 
-    val cards = remember {
-        val selected = RomanianAlphabet.getRandomLetters(6, "")
+    val stats by repository.appStats.collectAsState(initial = null)
+    val level = DifficultyManager.fromInt(stats?.difficulty ?: 1)
+    val pairCount = when (level) {
+        DifficultyLevel.BEGINNER -> 4
+        DifficultyLevel.INTERMEDIATE -> 6
+        DifficultyLevel.ADVANCED -> 8
+    }
+
+    val cards = remember(pairCount) {
+        val selected = RomanianAlphabet.getRandomLetters(pairCount, "")
         val cardList = mutableStateListOf<MatchCard>()
         var id = 0
         selected.forEach { letter ->
@@ -140,7 +152,11 @@ fun MatchGameScreen(
                 .offset(x = 15.dp, y = (-15 + floatOffset).dp)
         )
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+        ) {
             // Header
             Row(
                 modifier = Modifier
@@ -158,7 +174,7 @@ fun MatchGameScreen(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Inapoi",
+                            contentDescription = "Înapoi",
                             tint = DuoOrange
                         )
                     }
@@ -169,7 +185,7 @@ fun MatchGameScreen(
                         modifier = Modifier.offset(y = floatOffset.dp)
                     )
                     Text(
-                        text = "Potriveste Literele",
+                        text = "Potrivește literele",
                         style = MaterialTheme.typography.headlineMedium,
                         color = DuoOrange,
                         fontWeight = FontWeight.ExtraBold,
@@ -181,7 +197,7 @@ fun MatchGameScreen(
                     colors = CardDefaults.cardColors(containerColor = DuoOrange)
                 ) {
                     Text(
-                        text = "Mutari: $moves",
+                        text = "Mutări: $moves",
                         color = Color.White,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -224,11 +240,11 @@ fun MatchGameScreen(
                                         cards[index] = second.copy(isMatched = true)
                                         matchedPairs++
                                         soundManager.speakEncouragement(true)
-                                        if (matchedPairs == 6) {
+                                        if (matchedPairs == pairCount) {
                                             gameOver = true
                                             val stars = when {
-                                                moves <= 8 -> 3
-                                                moves <= 12 -> 2
+                                                moves <= pairCount + 2 -> 3
+                                                moves <= pairCount * 2 -> 2
                                                 else -> 1
                                             }
                                             scope.launch {
@@ -269,22 +285,22 @@ fun MatchGameScreen(
                     Text("\uD83C\uDF89", fontSize = 56.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Felicitari!",
+                        text = "Felicitări!",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Black,
                         color = DuoGreen
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Ai terminat in $moves mutari!",
+                        text = "Ai terminat în $moves mutări!",
                         style = MaterialTheme.typography.titleLarge,
                         color = OnBackground
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     StarRating(
                         stars = when {
-                            moves <= 8 -> 3
-                            moves <= 12 -> 2
+                            moves <= pairCount + 2 -> 3
+                            moves <= pairCount * 2 -> 2
                             else -> 1
                         }
                     )

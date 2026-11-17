@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -85,7 +86,7 @@ fun SyllableScreen(
     val scope = rememberCoroutineScope()
 
     val consonants = listOf("B", "C", "D", "F", "G", "L", "M", "N", "P", "R", "S", "T", "V", "Z")
-    val vowels = listOf("A", "E", "I", "O", "U", "\u0102")
+    val vowels = listOf("A", "E", "I", "O", "U", "Ă")
 
     val infiniteTransition = rememberInfiniteTransition(label = "syllable_anim")
     val floatOffset by infiniteTransition.animateFloat(
@@ -146,14 +147,18 @@ fun SyllableScreen(
                 .offset(x = (-15).dp, y = (-10 + floatOffset).dp)
         )
 
-        Row(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+        ) {
             // Left: Consonants + Vowels selection
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
-                    .padding(16.dp)
                     .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 // Header
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -165,7 +170,7 @@ fun SyllableScreen(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Inapoi",
+                            contentDescription = "Înapoi",
                             tint = DuoOrange
                         )
                     }
@@ -176,7 +181,7 @@ fun SyllableScreen(
                         modifier = Modifier.offset(y = floatOffset.dp)
                     )
                     Text(
-                        text = "Formeaza Silabe",
+                        text = "Formează silabe",
                         style = MaterialTheme.typography.headlineMedium,
                         color = DuoOrange,
                         fontWeight = FontWeight.ExtraBold,
@@ -188,7 +193,7 @@ fun SyllableScreen(
 
                 // Consonants
                 Text(
-                    text = "\uD83C\uDF3B Alege o consoana:",
+                    text = "\uD83C\uDF3B Alege o consoană:",
                     style = MaterialTheme.typography.titleMedium,
                     color = OnBackground,
                     fontWeight = FontWeight.ExtraBold
@@ -218,7 +223,7 @@ fun SyllableScreen(
 
                 // Vowels
                 Text(
-                    text = "\uD83C\uDF39 Alege o vocala:",
+                    text = "\uD83C\uDF39 Alege o vocală:",
                     style = MaterialTheme.typography.titleMedium,
                     color = OnBackground,
                     fontWeight = FontWeight.ExtraBold
@@ -248,9 +253,10 @@ fun SyllableScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // Current syllable display
                 Card(
@@ -262,12 +268,12 @@ fun SyllableScreen(
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = if (currentSyllable.isNotEmpty()) currentSyllable else "_ _",
-                            fontSize = 56.sp,
+                            fontSize = 48.sp,
                             fontWeight = FontWeight.Black,
                             color = if (currentSyllable.isNotEmpty()) Color.White else OnBackgroundLight,
                             textAlign = TextAlign.Center
@@ -278,7 +284,7 @@ fun SyllableScreen(
                             ) {
                                 Icon(
                                     Icons.Filled.VolumeUp,
-                                    contentDescription = "Asculta silaba",
+                                    contentDescription = "Ascultă silaba",
                                     tint = Color.White,
                                     modifier = Modifier.size(32.dp)
                                 )
@@ -295,11 +301,11 @@ fun SyllableScreen(
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "\uD83D\uDC3B Formeaza cuvantul:",
+                            text = "\uD83D\uDC3B Formează cuvântul:",
                             style = MaterialTheme.typography.titleMedium,
                             color = OnBackground,
                             fontWeight = FontWeight.ExtraBold
@@ -360,13 +366,13 @@ fun SyllableScreen(
                                 selectedConsonant = null
                                 selectedVowel = null
                                 currentSyllable = ""
-                                soundManager.speakWord(entry.key)
+                                soundManager.speakWord(entry.key.lowercase())
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = DuoOrange),
                             shape = RoundedCornerShape(20.dp)
                         ) {
                             Text(
-                                text = if (wordChallenge == null) "Incepe!" else "Cuvant nou",
+                                text = if (wordChallenge == null) "Începe!" else "Cuvânt nou",
                                 fontWeight = FontWeight.Bold
                             )
                         }

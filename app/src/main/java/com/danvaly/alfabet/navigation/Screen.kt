@@ -33,4 +33,10 @@ sealed class Screen(val route: String) {
     }
     data object ReadingTrainer : Screen("reading_trainer")
     data object ParentDashboard : Screen("parent_dashboard")
+    data object ReadingHub : Screen("reading_hub")
+    data object SpellWord : Screen("spell_word")
+    data object SyllableSplit : Screen("syllable_split")
+    data object ConfusableLetters : Screen("confusable_letters")
+    data object HardWords : Screen("hard_words")
+    data object StickerAlbum : Screen("sticker_album")
 }

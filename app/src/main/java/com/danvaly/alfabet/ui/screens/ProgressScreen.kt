@@ -18,7 +18,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -35,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,9 +48,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.danvaly.alfabet.data.ReadingContent
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
+import com.danvaly.alfabet.ui.LocalReadingStore
 import com.danvaly.alfabet.ui.theme.*
+import java.time.LocalDate
 
 @Composable
 fun ProgressScreen(
@@ -78,6 +85,15 @@ fun ProgressScreen(
         label = "float2"
     )
 
+    val store = LocalReadingStore.current
+    val today = remember { LocalDate.now().toString() }
+    val storiesRead = remember(store) { store.storiesRead() }
+    val readingStars = remember(store) { store.totalReadingStars() }
+    val trainerStars = remember(store) { ReadingContent.trainerLevels.sumOf { store.levelStars(it.id) } }
+    val hardWordCount = remember(store) { store.hardWords().size }
+    val minutesToday = remember(store) { store.minutesOn(today) }
+    val dailyGoal = remember(store) { store.dailyGoalMinutes }
+
     val learnedLetters = allProgress.filter { it.learnCompleted }.map { it.letter }.toSet()
     val totalLetters = RomanianAlphabet.letters.size
     val progress = if (totalLetters > 0) learnedCount.toFloat() / totalLetters else 0f
@@ -90,6 +106,7 @@ fun ProgressScreen(
                     colors = listOf(Color(0xFFFFF8E1), Color(0xFFFFECB3), Color(0xFFFFF3E0))
                 )
             )
+            .systemBarsPadding()
     ) {
         // Floating decorations
         Text(
@@ -136,7 +153,7 @@ fun ProgressScreen(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Inapoi",
+                        contentDescription = "Înapoi",
                         tint = Color(0xFFCCAD00)
                     )
                 }
@@ -164,7 +181,8 @@ fun ProgressScreen(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 16.dp),
+                        .verticalScroll(rememberScrollState())
+                        .padding(end = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Progress card
@@ -182,7 +200,7 @@ fun ProgressScreen(
                                 Text(text = "\uD83D\uDCDA", fontSize = 24.sp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Litere invatate",
+                                    text = "Litere învățate",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = OnBackground
@@ -233,9 +251,21 @@ fun ProgressScreen(
                         )
                     }
 
+                    // Reading
+                    ReadingProgressCard(
+                        storiesRead = storiesRead,
+                        totalStories = ReadingContent.stories.size,
+                        readingStars = readingStars,
+                        trainerStars = trainerStars,
+                        trainerMaxStars = ReadingContent.trainerLevels.size * 3,
+                        hardWordCount = hardWordCount,
+                        minutesToday = minutesToday,
+                        dailyGoal = dailyGoal
+                    )
+
                     // Achievements
                     Text(
-                        text = "\uD83C\uDFC5 Realizari",
+                        text = "\uD83C\uDFC5 Realizări",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = OnBackground
@@ -268,7 +298,7 @@ fun ProgressScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "\uD83D\uDC3E Album de Stickere",
+                            text = "\uD83D\uDC3E Literele mele",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color = OnBackground
@@ -410,5 +440,83 @@ private fun StickerCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ReadingProgressCard(
+    storiesRead: Int,
+    totalStories: Int,
+    readingStars: Int,
+    trainerStars: Int,
+    trainerMaxStars: Int,
+    hardWordCount: Int,
+    minutesToday: Int,
+    dailyGoal: Int
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "📖", fontSize = 24.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Citesc",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = OnBackground
+                )
+            }
+            ReadingLine("📚", "Povești citite", "$storiesRead / $totalStories")
+            LinearProgressIndicator(
+                progress = { if (totalStories > 0) storiesRead.toFloat() / totalStories else 0f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
+                color = Color(0xFF00ACC1),
+                trackColor = Color(0xFF00ACC1).copy(alpha = 0.15f)
+            )
+            ReadingLine("⭐", "Stele la citit", "$readingStars")
+            ReadingLine("👣", "Citesc pas cu pas", "$trainerStars / $trainerMaxStars ⭐")
+            ReadingLine("💪", "Cuvinte grele de exersat", "$hardWordCount")
+            ReadingLine(
+                "⏱",
+                "Azi",
+                if (minutesToday >= dailyGoal) "$minutesToday / $dailyGoal min ⭐" else "$minutesToday / $dailyGoal min"
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReadingLine(emoji: String, label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = emoji, fontSize = 18.sp)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnBackgroundLight,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            color = OnBackground,
+            fontWeight = FontWeight.Black
+        )
     }
 }

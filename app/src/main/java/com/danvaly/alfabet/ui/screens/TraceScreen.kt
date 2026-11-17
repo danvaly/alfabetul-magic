@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -105,6 +106,7 @@ fun TraceScreen(
                     colors = listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB), BackgroundCream)
                 )
             )
+            .systemBarsPadding()
     ) {
         // Decorations
         Text(
@@ -139,7 +141,7 @@ fun TraceScreen(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Inapoi",
+                            contentDescription = "Înapoi",
                             tint = DuoBlue
                         )
                     }
@@ -159,7 +161,7 @@ fun TraceScreen(
                         )
                     }
                     Text(
-                        text = "Urmareste forma literei cu degetul",
+                        text = "Urmărește forma literei cu degetul",
                         style = MaterialTheme.typography.bodyMedium,
                         color = OnBackgroundLight
                     )
@@ -178,7 +180,7 @@ fun TraceScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            if (isUppercase) "minuscula" else "MAJUSCULA",
+                            if (isUppercase) "literă mică" else "LITERĂ MARE",
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -193,9 +195,9 @@ fun TraceScreen(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Sterge")
+                        Icon(Icons.Filled.Delete, contentDescription = "Șterge")
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Sterge", fontWeight = FontWeight.Bold)
+                        Text("Șterge", fontWeight = FontWeight.Bold)
                     }
 
                     Button(
@@ -231,9 +233,9 @@ fun TraceScreen(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Urmatoarea", fontWeight = FontWeight.Bold)
+                        Text("Următoarea", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Urmatoarea")
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Următoarea")
                     }
                 }
             }
@@ -300,8 +302,8 @@ fun TraceScreen(
                                 text = when (stars) {
                                     3 -> "\uD83C\uDF89 Excelent!"
                                     2 -> "\u2B50 Foarte bine!"
-                                    1 -> "\uD83D\uDC4D Bun inceput!"
-                                    else -> "\uD83D\uDCAA Mai incearca!"
+                                    1 -> "\uD83D\uDC4D Bun început!"
+                                    else -> "\uD83D\uDCAA Mai încearcă!"
                                 },
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.ExtraBold,
@@ -342,6 +344,7 @@ fun TraceSelectorScreen(
                     colors = listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB), BackgroundCream)
                 )
             )
+            .systemBarsPadding()
     ) {
         Text(
             text = "\uD83D\uDC1D",
@@ -366,7 +369,7 @@ fun TraceSelectorScreen(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Inapoi",
+                        contentDescription = "Înapoi",
                         tint = DuoBlue
                     )
                 }
@@ -377,7 +380,7 @@ fun TraceSelectorScreen(
                     modifier = Modifier.offset(y = floatOffset.dp)
                 )
                 Text(
-                    text = "Alege o litera pentru a scrie",
+                    text = "Alege o literă pentru a scrie",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoBlue,
                     fontWeight = FontWeight.ExtraBold,

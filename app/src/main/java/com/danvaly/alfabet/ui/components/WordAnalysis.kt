@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,8 @@ import com.danvaly.alfabet.audio.SoundManager
 import com.danvaly.alfabet.data.LetterUnit
 import com.danvaly.alfabet.data.ReadingWord
 import com.danvaly.alfabet.data.SoundKind
+import com.danvaly.alfabet.data.markedOf
+import com.danvaly.alfabet.ui.LocalReadingStore
 import com.danvaly.alfabet.ui.theme.ConsonantColor
 import com.danvaly.alfabet.ui.theme.DiacriticColor
 import com.danvaly.alfabet.ui.theme.DuoGreen
@@ -198,6 +201,12 @@ fun WordAnalysisDialog(
     var spot by remember { mutableStateOf<Spot?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
     val units = remember(word) { word.units }
+    val store = LocalReadingStore.current
+
+    // Opening the analysis means the word was hard to read alone.
+    LaunchedEffect(word) {
+        store.recordLookup(markedOf(word))
+    }
 
     fun play(block: suspend () -> Unit) {
         job?.cancel()

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -117,6 +118,7 @@ fun DailyChallengeScreen(
                     colors = listOf(Color(0xFFFFF8E1), Color(0xFFFFECB3), Color(0xFFFFF3E0))
                 )
             )
+            .systemBarsPadding()
     ) {
         Text(
             text = "\u2B50",
@@ -154,7 +156,7 @@ fun DailyChallengeScreen(
                         .clip(CircleShape)
                         .background(DuoYellow.copy(alpha = 0.3f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = Color(0xFFCCAD00))
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = Color(0xFFCCAD00))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -163,7 +165,7 @@ fun DailyChallengeScreen(
                     modifier = Modifier.offset(y = floatOffset.dp)
                 )
                 Text(
-                    text = "Provocarea Zilei",
+                    text = "Provocarea zilei",
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color(0xFFCCAD00),
                     fontWeight = FontWeight.ExtraBold,
@@ -184,7 +186,7 @@ fun DailyChallengeScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Cuvantul de azi:",
+                        text = "Cuvântul de azi:",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = OnBackground
@@ -224,9 +226,9 @@ fun DailyChallengeScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = DuoYellow),
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        Icon(Icons.Filled.VolumeUp, contentDescription = "Asculta", tint = Color(0xFF5D4E00))
+                        Icon(Icons.Filled.VolumeUp, contentDescription = "Ascultă", tint = Color(0xFF5D4E00))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Asculta", fontWeight = FontWeight.Bold, color = Color(0xFF5D4E00))
+                        Text("Ascultă", fontWeight = FontWeight.Bold, color = Color(0xFF5D4E00))
                     }
                 }
 
@@ -237,7 +239,7 @@ fun DailyChallengeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Cu ce litera incepe\n\"${dailyWord.word}\"?",
+                        text = "Cu ce literă începe\n\"${dailyWord.word}\"?",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = OnBackground,
@@ -313,7 +315,7 @@ fun DailyChallengeScreen(
                             colors = CardDefaults.cardColors(containerColor = DuoGreen.copy(alpha = 0.15f))
                         ) {
                             Text(
-                                text = "\u2705 Provocare completa! Revino maine!",
+                                text = "\u2705 Provocare completă! Revino mâine!",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = DuoGreen,
@@ -333,7 +335,7 @@ fun DailyChallengeScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = DuoOrange),
                             shape = RoundedCornerShape(20.dp)
                         ) {
-                            Text("Incearca din nou", fontWeight = FontWeight.Bold)
+                            Text("Încearcă din nou", fontWeight = FontWeight.Bold)
                         }
                     }
                 }

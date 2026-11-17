@@ -55,7 +55,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,13 +65,13 @@ import com.danvaly.alfabet.data.Actor
 import com.danvaly.alfabet.data.Backdrop
 import com.danvaly.alfabet.data.Motion
 import com.danvaly.alfabet.data.ReadingContent
-import com.danvaly.alfabet.data.ReadingProgressStore
 import com.danvaly.alfabet.data.ReadingText
 import com.danvaly.alfabet.data.ReadingWord
 import com.danvaly.alfabet.data.Scene
 import com.danvaly.alfabet.data.Story
 import com.danvaly.alfabet.data.StoryChoice
 import com.danvaly.alfabet.data.repository.ProgressRepository
+import com.danvaly.alfabet.ui.LocalReadingStore
 import com.danvaly.alfabet.ui.components.ConfettiAnimation
 import com.danvaly.alfabet.ui.components.StarRating
 import com.danvaly.alfabet.ui.components.StoryIllustration
@@ -118,8 +117,7 @@ fun StoriesScreen(
     onStoryClick: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
-    val store = remember { ReadingProgressStore(context) }
+    val store = LocalReadingStore.current
 
     Box(
         modifier = Modifier
@@ -233,9 +231,11 @@ fun StoryReaderScreen(
     repository: ProgressRepository
 ) {
     val story = remember(storyId) { ReadingContent.getStory(storyId) ?: ReadingContent.stories.first() }
-    val context = LocalContext.current
-    val store = remember { ReadingProgressStore(context) }
+    val store = LocalReadingStore.current
     val scope = rememberCoroutineScope()
+    // Stickers already owned when the story was opened; anything after that is new.
+    val stickersAtStart = remember { store.stickers().size }
+    var newStickers by remember { mutableStateOf<List<String>>(emptyList()) }
 
     var phase by remember { mutableStateOf(ReaderPhase.READING) }
     var pageIndex by remember { mutableIntStateOf(0) }
@@ -414,6 +414,8 @@ fun StoryReaderScreen(
                                 val stars = ReadingContent.starsFor(firstTryCorrect, story.questions.size)
                                 earnedStars = stars
                                 store.saveStoryStars(story.id, stars)
+                                store.awardSticker("story_${story.id}")
+                                newStickers = store.stickers().drop(stickersAtStart)
                                 scope.launch { repository.onGamePlayed(stars) }
                                 phase = ReaderPhase.DONE
                             }
@@ -433,11 +435,26 @@ fun StoryReaderScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             StarRating(stars = earnedStars)
+                            if (newStickers.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = if (newStickers.size == 1) {
+                                        "Ai primit un abțibild: ${newStickers.first()}"
+                                    } else {
+                                        "Ai primit abțibilduri: ${newStickers.joinToString(" ")}"
+                                    },
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = DuoOrange,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                             Spacer(modifier = Modifier.height(16.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Button(
                                     onClick = {
                                         pageIndex = 0
+                                        newStickers = emptyList()
                                         phase = ReaderPhase.READING
                                     },
                                     colors = ButtonDefaults.buttonColors(containerColor = DuoBlue),

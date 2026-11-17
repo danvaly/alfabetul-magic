@@ -46,6 +46,9 @@ interface ProgressDao {
     @Query("UPDATE app_stats SET totalPlayTimeMinutes = totalPlayTimeMinutes + :minutes WHERE id = 1")
     suspend fun addPlayTime(minutes: Int)
 
+    @Query("UPDATE app_stats SET lastPlayDate = :date, currentStreak = :streak WHERE id = 1")
+    suspend fun updateStreak(date: String, streak: Int)
+
     @Query("SELECT SUM(traceStars) + SUM(wordMatchStars) + SUM(diacriticStars) FROM letter_progress")
     fun getAllStarsTotal(): Flow<Int?>
 }

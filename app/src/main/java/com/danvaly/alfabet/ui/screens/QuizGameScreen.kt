@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
+import com.danvaly.alfabet.data.DifficultyManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.model.Letter
 import com.danvaly.alfabet.data.repository.ProgressRepository
@@ -82,12 +87,20 @@ fun QuizGameScreen(
     var selectedAnswer by remember { mutableStateOf<String?>(null) }
     var showFeedback by remember { mutableStateOf(false) }
     val totalQuestions = 10
+    val stats by repository.appStats.collectAsState(initial = null)
+    val level = DifficultyManager.fromInt(stats?.difficulty ?: 1)
 
     val targetLetter = remember(currentQuestion) {
         RomanianAlphabet.letters.random()
     }
-    val options = remember(currentQuestion) {
-        val others = RomanianAlphabet.getRandomLetters(3, targetLetter.uppercase)
+    val options = remember(currentQuestion, level) {
+        // Â and Î sound the same, so never offer one as a distractor for the other.
+        val sameSound = setOf("Â", "Î")
+        val others = RomanianAlphabet.letters
+            .filter { it.uppercase != targetLetter.uppercase }
+            .filter { !(it.uppercase in sameSound && targetLetter.uppercase in sameSound) }
+            .shuffled()
+            .take(level.optionCount - 1)
         (others + targetLetter).shuffled()
     }
 
@@ -153,7 +166,8 @@ fun QuizGameScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .systemBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header
@@ -168,11 +182,11 @@ fun QuizGameScreen(
                         .clip(CircleShape)
                         .background(DuoGreen.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoGreen)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoGreen)
                 }
 
                 Text(
-                    text = "\uD83C\uDFB5 Ce Litera Auzi?",
+                    text = "\uD83C\uDFB5 Ce literă auzi?",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoGreen,
                     fontWeight = FontWeight.ExtraBold
@@ -203,7 +217,7 @@ fun QuizGameScreen(
                 trackColor = DuoGreen.copy(alpha = 0.2f)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -216,7 +230,7 @@ fun QuizGameScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Asculta sunetul:",
+                        text = "Ascultă sunetul:",
                         style = MaterialTheme.typography.titleLarge,
                         color = OnBackground,
                         fontWeight = FontWeight.Bold
@@ -251,7 +265,7 @@ fun QuizGameScreen(
                             ) {
                                 Icon(
                                     Icons.Filled.VolumeUp,
-                                    contentDescription = "Asculta",
+                                    contentDescription = "Ascultă",
                                     tint = Color.White,
                                     modifier = Modifier.size(56.dp)
                                 )
@@ -269,11 +283,13 @@ fun QuizGameScreen(
 
                 // Right: Answer options
                 Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "Alege litera corecta:",
+                        text = "Alege litera corectă:",
                         style = MaterialTheme.typography.titleLarge,
                         color = OnBackground,
                         fontWeight = FontWeight.Bold

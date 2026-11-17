@@ -21,7 +21,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,6 +39,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
+import com.danvaly.alfabet.data.DifficultyManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.ConfettiAnimation
@@ -76,17 +82,29 @@ fun RhymingGameScreen(
     var showFeedback by remember { mutableStateOf(false) }
     var showConfetti by remember { mutableStateOf(false) }
     val totalRounds = pairs.size.coerceAtMost(10)
+    val stats by repository.appStats.collectAsState(initial = null)
+    val level = DifficultyManager.fromInt(stats?.difficulty ?: 1)
 
     val currentPair = pairs.getOrNull(currentIndex)
-    val options = remember(currentIndex) {
+    val options = remember(currentIndex, level) {
         if (currentPair == null) emptyList()
         else {
+            // Never offer a distractor that also rhymes (e.g. "sare" for "soare").
+            val ending = currentPair.first.takeLast(2)
             val distractors = pairs
-                .filter { it != currentPair }
+                .filter { it != currentPair && !it.second.endsWith(ending) }
                 .shuffled()
-                .take(2)
+                .take(level.optionCount - 1)
                 .map { it.second }
             (distractors + currentPair.second).shuffled()
+        }
+    }
+
+    // Beginners hear the word to rhyme with at the start of every round.
+    LaunchedEffect(currentIndex, level) {
+        val pair = pairs.getOrNull(currentIndex)
+        if (level.hintEnabled && pair != null && !gameOver) {
+            soundManager.speakWord(pair.first)
         }
     }
 
@@ -142,7 +160,8 @@ fun RhymingGameScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .systemBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -156,10 +175,10 @@ fun RhymingGameScreen(
                         .clip(CircleShape)
                         .background(DuoPink.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoPink)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoPink)
                 }
                 Text(
-                    text = "\uD83C\uDFB5 Jocul Rimelor",
+                    text = "\uD83C\uDFB5 Jocul rimelor",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoPink,
                     fontWeight = FontWeight.ExtraBold
@@ -189,7 +208,7 @@ fun RhymingGameScreen(
             )
 
             if (currentPair != null && !gameOver) {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -202,7 +221,7 @@ fun RhymingGameScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "Ce rimeaza cu:",
+                            text = "Ce rimează cu:",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = OnBackground,
@@ -210,7 +229,9 @@ fun RhymingGameScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Card(
-                            modifier = Modifier.scale(pulseScale),
+                            modifier = Modifier
+                                .scale(pulseScale)
+                                .clickable { soundManager.speakWord(currentPair.first) },
                             shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(containerColor = DuoPink),
                             elevation = CardDefaults.cardElevation(8.dp)
@@ -233,8 +254,10 @@ fun RhymingGameScreen(
 
                     // Right: Options
                     Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
                             text = "Alege rima:",

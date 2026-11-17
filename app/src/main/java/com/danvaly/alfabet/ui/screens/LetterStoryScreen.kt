@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -107,6 +108,7 @@ fun LetterStoryScreen(
                     colors = listOf(Color(0xFFFFF3E0), Color(0xFFFFE0B2), Color(0xFFFFF8E1))
                 )
             )
+            .systemBarsPadding()
     ) {
         Text(
             text = "\uD83E\uDD8B",
@@ -149,7 +151,7 @@ fun LetterStoryScreen(
                         .clip(CircleShape)
                         .background(DuoOrange.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoOrange)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoOrange)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -158,7 +160,7 @@ fun LetterStoryScreen(
                     modifier = Modifier.offset(y = floatOffset.dp)
                 )
                 Text(
-                    text = "Povestea Literei ${letter.uppercase}",
+                    text = "Povestea literei ${letter.uppercase}",
                     style = MaterialTheme.typography.headlineMedium,
                     color = DuoOrange,
                     fontWeight = FontWeight.ExtraBold,
@@ -217,9 +219,9 @@ fun LetterStoryScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = DuoOrange),
                             shape = RoundedCornerShape(20.dp)
                         ) {
-                            Icon(Icons.Filled.VolumeUp, contentDescription = "Asculta povestea")
+                            Icon(Icons.Filled.VolumeUp, contentDescription = "Ascultă povestea")
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Asculta Povestea", fontWeight = FontWeight.Bold)
+                            Text("Ascultă povestea", fontWeight = FontWeight.Bold)
                         }
                     }
                 }

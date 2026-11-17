@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -37,6 +38,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +56,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danvaly.alfabet.audio.SoundManager
+import com.danvaly.alfabet.data.DifficultyLevel
+import com.danvaly.alfabet.data.DifficultyManager
 import com.danvaly.alfabet.data.RomanianAlphabet
 import com.danvaly.alfabet.data.repository.ProgressRepository
 import com.danvaly.alfabet.ui.components.ConfettiAnimation
@@ -78,6 +83,16 @@ fun DiacriticsScreen(
     val totalExercises = exercises.size.coerceAtMost(8)
 
     val currentExercise = exercises.getOrNull(currentIndex)
+    val stats by repository.appStats.collectAsState(initial = null)
+    val level = DifficultyManager.fromInt(stats?.difficulty ?: 1)
+
+    // Beginners hear the correct word at the start of every round.
+    LaunchedEffect(currentIndex, level) {
+        val exercise = exercises.getOrNull(currentIndex)
+        if (level.hintEnabled && exercise != null && !gameOver) {
+            soundManager.speakWord(exercise.diacriticWord)
+        }
+    }
 
     val infiniteTransition = rememberInfiniteTransition(label = "diac_anim")
     val floatOffset by infiniteTransition.animateFloat(
@@ -122,7 +137,8 @@ fun DiacriticsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .systemBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -136,7 +152,7 @@ fun DiacriticsScreen(
                         .clip(CircleShape)
                         .background(DuoPurple.copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Inapoi", tint = DuoPurple)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Înapoi", tint = DuoPurple)
                 }
                 Text(
                     text = "\u270D\uFE0F Diacritice",
@@ -169,7 +185,7 @@ fun DiacriticsScreen(
             )
 
             if (currentExercise != null && !gameOver) {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -182,7 +198,7 @@ fun DiacriticsScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "Care este cuvantul corect?",
+                            text = "Care este cuvântul corect?",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = OnBackground,
@@ -193,18 +209,21 @@ fun DiacriticsScreen(
                             text = currentExercise.diacriticEmoji,
                             fontSize = 72.sp
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Card(
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = DuoPurple.copy(alpha = 0.15f))
-                        ) {
-                            Text(
-                                text = "${currentExercise.diacriticLetter} vs ${currentExercise.baseLetter}",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Black,
-                                color = DuoPurple,
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
+                        // The letter hint is dropped at the hardest level.
+                        if (level != DifficultyLevel.ADVANCED) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = DuoPurple.copy(alpha = 0.15f))
+                            ) {
+                                Text(
+                                    text = "${currentExercise.diacriticLetter} sau ${currentExercise.baseLetter}?",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Black,
+                                    color = DuoPurple,
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                                )
+                            }
                         }
                     }
 

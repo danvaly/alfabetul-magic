@@ -46,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,7 +55,9 @@ import com.danvaly.alfabet.data.ReadingContent
 import com.danvaly.alfabet.data.ReadingProgressStore
 import com.danvaly.alfabet.data.TrainerLevel
 import com.danvaly.alfabet.data.TrainerWord
+import com.danvaly.alfabet.data.markedOf
 import com.danvaly.alfabet.data.repository.ProgressRepository
+import com.danvaly.alfabet.ui.LocalReadingStore
 import com.danvaly.alfabet.ui.components.ConfettiAnimation
 import com.danvaly.alfabet.ui.components.LetterTile
 import com.danvaly.alfabet.ui.components.StarRating
@@ -99,8 +100,7 @@ fun ReadingTrainerScreen(
     soundManager: SoundManager,
     repository: ProgressRepository
 ) {
-    val context = LocalContext.current
-    val store = remember { ReadingProgressStore(context) }
+    val store = LocalReadingStore.current
     val scope = rememberCoroutineScope()
 
     var level by remember { mutableStateOf<TrainerLevel?>(null) }
@@ -302,6 +302,7 @@ private fun TrainerTaskView(
     onSolved: (firstTry: Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val store = LocalReadingStore.current
     val word = task.target.word
     val units = remember(word) { word.units }
 
@@ -453,6 +454,7 @@ private fun TrainerTaskView(
                                 if (isAnswer) {
                                     solved = true
                                     val firstTry = wrongPictures.isEmpty()
+                                    if (firstTry) store.recordSuccess(markedOf(word))
                                     scope.launch {
                                         soundManager.speakStep(word.text)
                                         soundManager.speakEncouragement(true)
@@ -461,6 +463,7 @@ private fun TrainerTaskView(
                                     }
                                 } else {
                                     wrongPictures.add(picture)
+                                    store.recordMistake(markedOf(word))
                                     soundManager.speakEncouragement(false)
                                 }
                             },
