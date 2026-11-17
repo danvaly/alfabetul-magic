@@ -291,5 +291,43 @@ fun AlfabetNavGraph(
                 onBack = { navController.popBackStack() }
             )
         }
+
+        composable(Screen.EnglishHub.route) {
+            EnglishHubScreen(
+                onBack = { navController.popBackStack() },
+                onCategory = { id -> navController.navigate(Screen.EnglishLearn.createRoute(id)) },
+                soundManager = soundManager
+            )
+        }
+
+        composable(
+            route = Screen.EnglishLearn.route,
+            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId").orEmpty()
+            EnglishLearnScreen(
+                categoryId = categoryId,
+                onBack = { navController.popBackStack() },
+                onQuiz = { navController.navigate(Screen.EnglishQuiz.createRoute(categoryId)) },
+                soundManager = soundManager
+            )
+        }
+
+        composable(
+            route = Screen.EnglishQuiz.route,
+            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            EnglishQuizScreen(
+                categoryId = backStackEntry.arguments?.getString("categoryId").orEmpty(),
+                onBack = { navController.popBackStack() },
+                onCategories = {
+                    if (!navController.popBackStack(Screen.EnglishHub.route, inclusive = false)) {
+                        navController.popBackStack()
+                    }
+                },
+                soundManager = soundManager,
+                repository = repository
+            )
+        }
     }
 }

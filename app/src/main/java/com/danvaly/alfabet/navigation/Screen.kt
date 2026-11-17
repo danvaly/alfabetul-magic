@@ -39,4 +39,11 @@ sealed class Screen(val route: String) {
     data object ConfusableLetters : Screen("confusable_letters")
     data object HardWords : Screen("hard_words")
     data object StickerAlbum : Screen("sticker_album")
+    data object EnglishHub : Screen("english_hub")
+    data object EnglishLearn : Screen("english_learn/{categoryId}") {
+        fun createRoute(categoryId: String) = "english_learn/$categoryId"
+    }
+    data object EnglishQuiz : Screen("english_quiz/{categoryId}") {
+        fun createRoute(categoryId: String) = "english_quiz/$categoryId"
+    }
 }
