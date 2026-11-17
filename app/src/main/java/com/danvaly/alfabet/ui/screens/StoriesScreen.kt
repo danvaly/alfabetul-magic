@@ -1013,9 +1013,9 @@ private fun TogglePill(
 @Composable
 private fun ControlGroup(color: Color, content: @Composable () -> Unit) {
     Row(
+        // Background without clipping, so the "nou" badge and the pulsing button can stick out.
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.08f))
+            .background(color.copy(alpha = 0.08f), RoundedCornerShape(50))
             .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
