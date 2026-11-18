@@ -12,8 +12,8 @@ android {
         applicationId = "com.danvaly.alfabet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -66,6 +66,8 @@ android {
             all {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.maxHeapSize = "3g"
+                // Screenshot tests need the debug-only test activity; skip them for release.
+                if (it.name.contains("Release")) it.exclude("**/shots/**")
             }
         }
     }
